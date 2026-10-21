@@ -12,7 +12,9 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    *{font-family:'Plus Jakarta Sans',sans-serif;user-select:none;-webkit-tap-highlight-color:transparent}
+    *{font-family:'Plus Jakarta Sans',sans-serif;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+    /* FIX: iOS Safari blocks typing into inputs when user-select is none */
+    input,textarea,select{user-select:text;-webkit-user-select:text}
     .glass-panel{background:rgba(15,23,42,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 40px -15px rgba(0,0,0,.5)}
     .glass-card{background:rgba(30,41,59,.5);border:1px solid rgba(255,255,255,.06)}
     input[type=range]{accent-color:#3b82f6}
@@ -32,6 +34,15 @@
     <div id="statusBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900/90 border border-slate-800 text-slate-300 shadow-inner"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="status">Standby</span></div>
   </div>
 </header>
+
+<!-- Environment warning (file:// or non-HTTPS) -->
+<div id="envNotice" class="hidden max-w-xl w-full mx-auto px-4 pt-3">
+  <div id="envText" class="rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs font-semibold px-4 py-3"></div>
+</div>
+<!-- Audio unlock banner -->
+<div id="audioNotice" class="hidden max-w-xl w-full mx-auto px-4 pt-3">
+  <button id="audioNoticeBtn" class="w-full rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-sm font-bold px-4 py-3 flex items-center justify-center gap-2"><i class="fa-solid fa-volume-high"></i><span>Tap anywhere to enable audio</span></button>
+</div>
 
 <div id="landing" class="max-w-md w-full mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
   <div class="text-center mb-8 space-y-3">
@@ -65,7 +76,7 @@
     <canvas id="visualizer" class="w-full h-24 rounded-2xl bg-slate-950/80 border border-slate-800/80"></canvas>
     <div id="ytContainer" class="w-full hidden relative rounded-2xl overflow-hidden aspect-video border border-slate-800 bg-slate-950 mt-2"><div id="ytPlayer"></div></div>
     <button id="ytEnable" class="hidden mt-3 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Enable YouTube Playback</button>
-    <p id="ytAdStatus" class="hidden text-[10px] text-center text-slate-500 mt-2">YouTube playback muted during detected advertising.</p>
+    <p id="ytAdStatus" class="hidden text-[10px] text-center text-amber-400 mt-2 font-semibold">⚠️ YouTube advertisement suspected — audio muted. Ads are not synced across devices.</p>
   </div>
 
   <section class="hostonly glass-panel rounded-3xl p-5 space-y-4">
@@ -85,7 +96,7 @@
     <label class="w-full py-3 px-4 rounded-2xl border border-dashed border-slate-700 hover:border-blue-500/60 bg-slate-900/40 text-slate-300 cursor-pointer flex items-center justify-center gap-2 text-xs font-semibold">
       <i class="fa-solid fa-folder-plus text-blue-400"></i><span>Upload Local Audio</span><input type="file" id="files" accept="audio/*" multiple class="hidden">
     </label>
-    <p id="addHint" class="text-[10px] text-slate-500 text-center">Everyone in the room can add tracks. The host controls playback.</p>
+    <p id="addHint" class="text-[10px] text-slate-500 text-center">Everyone in the room can add tracks (guest uploads max 30 MB). The host controls playback.</p>
   </section>
 
   <div class="glass-panel rounded-3xl p-5 space-y-3">
@@ -99,7 +110,7 @@
       <div class="space-y-1.5"><label class="text-xs text-slate-400 font-semibold block">Stereo Output Channel</label><select id="chan" class="w-full bg-slate-900 border border-slate-800 text-white text-xs rounded-xl p-3"><option value="both" selected>Both (Full Stereo)</option><option value="left">Left Channel Only</option><option value="right">Right Channel Only</option></select></div>
       <div class="space-y-1.5"><div class="flex justify-between text-xs"><label class="text-slate-400 font-semibold">Volume</label><span id="volVal" class="text-slate-300 font-mono">100%</span></div><input type="range" id="vol" min="0" max="100" value="100" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer mt-2"></div>
     </div>
-    <div class="space-y-1.5 pt-3 border-t border-slate-800/60"><div class="flex justify-between text-xs"><label class="text-slate-400 font-semibold">Fine-Tune Sync Offset</label><span class="text-blue-400 font-mono font-bold"><span id="nv">0</span> ms</span></div><input type="range" id="nudge" min="-300" max="300" value="0" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer"><p class="text-[10px] text-slate-500">Adjust if this device lags (+) or plays earlier (−).</p></div>
+    <div class="space-y-1.5 pt-3 border-t border-slate-800/60"><div class="flex justify-between text-xs"><label class="text-slate-400 font-semibold">Fine-Tune Sync Offset</label><span class="text-blue-400 font-mono font-bold"><span id="nv">0</span> ms</span></div><input type="range" id="nudge" min="-300" max="300" value="0" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer"><p class="text-[10px] text-slate-500">Positive (+) delays this device. Negative (−) makes it play earlier. If this device sounds late, move toward −.</p></div>
     <button id="test" class="hostonly w-full py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-800"><i class="fa-solid fa-wave-square text-emerald-400"></i><span>Broadcast Sync Calibration Clicks</span></button>
   </section>
 
@@ -118,11 +129,35 @@
 const $=s=>document.querySelector(s);
 const wall=()=>performance.timeOrigin+performance.now();
 
+/* ---------- Config ---------- */
+const CHUNK=16384;
+const MAX_UPLOAD=30*1024*1024;               // max size of a guest-uploaded file
+const MAX_CHUNKS=Math.ceil(MAX_UPLOAD/CHUNK);
+const MAX_QUEUE=100;
+const YT_RE=/^[A-Za-z0-9_-]{11}$/;
+
+// STUN + TURN. The TURN entry is a free public relay (best effort, rate limited).
+// For real reliability replace it with your own credentials (Metered, Cloudflare, Twilio, coturn...).
+const ICE_SERVERS=[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'stun:global.stun.twilio.com:3478'},
+  {urls:[
+    'turn:openrelay.metered.ca:80',
+    'turn:openrelay.metered.ca:443',
+    'turn:openrelay.metered.ca:443?transport=tcp',
+    'turns:openrelay.metered.ca:443?transport=tcp'
+  ],username:'openrelayproject',credential:'openrelayproject'}
+];
+
+/* ---------- State ---------- */
 let peer=null,isHost=false,conns=[],hostConn=null,offset=0,bestRtt=Infinity;
-let localBC=null,isLocalBCMode=false,roomId=null,clockTimer=null;
+let localBC=null,roomId=null,clockTimer=null,retryTimer=null,retryCount=0,peerWatch=null;
 let ctx=null,master=null,analyser=null,playNode=null,cdTimer=null,animFrame=null;
 let ytPlayer=null,isYtReady=false,ytAutoplayBlocked=false,ytAdMuted=false;
+let ytLoadedFor=null,ytLoadStamp=0,ytStartTimer=null;
+const bcId=Math.random();
 const raw={}; const dec={}; const pend={}; const bad={}; const inc={};
+const uploading=new Set();   // ids of files this guest is still uploading (protected from cleanup)
 let state={queue:[],index:-1,status:'idle',anchorHost:0,anchorPos:0};
 
 const hostNow=()=>wall()+offset;
@@ -138,17 +173,49 @@ function setStatus(text,online=true){
   $('#statusDot').className=online?'w-2 h-2 rounded-full bg-emerald-400 animate-pulse':'w-2 h-2 rounded-full bg-amber-400';
 }
 
+/* ---------- Environment / audio unlock ---------- */
+function checkEnv(){
+  const box=$('#envNotice'),txt=$('#envText');
+  let msg='';
+  if(location.protocol==='file:')msg='This page is opened from a local file. The invite link/QR will not work for other devices — host this file over HTTPS (GitHub Pages, Netlify, Cloudflare Pages, etc.).';
+  else if(!window.isSecureContext)msg='This page is not served over HTTPS. Camera QR scanning, screen wake lock and clipboard copy may not work.';
+  if(msg){txt.textContent=msg;box.classList.remove('hidden')}else box.classList.add('hidden');
+}
+function updateAudioNotice(){
+  const inApp=!$('#app').classList.contains('hidden');
+  const need=inApp&&(!ctx||ctx.state!=='running');
+  $('#audioNotice').classList.toggle('hidden',!need);
+}
+function unlockAudio(){
+  if(ctx&&ctx.state!=='running')ctx.resume().catch(()=>{});
+}
+['pointerdown','pointerup','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{passive:true,capture:true}));
+function requestWake(){try{navigator.wakeLock?.request?.('screen')?.catch(()=>{})}catch{}}
+
 function ensureCtx(){
   if(!ctx){
     ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
     master=ctx.createGain(); master.gain.value=+$('input#vol').value/100;
     analyser=ctx.createAnalyser(); analyser.fftSize=128;
     master.connect(analyser); analyser.connect(ctx.destination); drawVisualizer();
+    ctx.onstatechange=()=>{updateAudioNotice();if(ctx.state==='running')apply()};
   }
   if(ctx.state!=='running')ctx.resume().catch(()=>{});
-  if(navigator.wakeLock?.request)navigator.wakeLock.request('screen').catch(()=>{});
+  requestWake();
+  updateAudioNotice();
 }
 
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  unlockAudio();requestWake();
+  if(!isHost&&roomId){
+    bestRtt=Infinity;
+    if(hostConn?.open)syncClock(8);else if(localBC)syncClockLocal(8);
+  }
+  apply();
+});
+
+/* ---------- Audio engine ---------- */
 function decode(id){
   if(dec[id]||bad[id]||!raw[id])return Promise.resolve();
   return pend[id]??=ctx.decodeAudioData(raw[id].slice(0)).then(b=>dec[id]=b).catch(()=>{bad[id]=1;setStatus('Failed to decode track',false)}).finally(()=>delete pend[id]);
@@ -158,6 +225,7 @@ function stopAudio(){
   if(playNode){playNode.src.onended=null;try{playNode.src.stop()}catch{};playNode=null}
 }
 function stopYouTube(){
+  clearTimeout(ytStartTimer);
   if(ytPlayer&&isYtReady)try{ytPlayer.pauseVideo()}catch{}
   $('#ytContainer').classList.add('hidden');$('#visualizer').classList.remove('hidden');
 }
@@ -171,6 +239,7 @@ function apply(){
   if(!ctx||!tr||state.status!=='playing'){if(state.status!=='playing')stop();return}
   if(tr.type==='youtube'){stopAudio();applyYouTubeSync(tr);return}
   stopYouTube();
+  if(ctx.state!=='running'){updateAudioNotice();return}
   if(!raw[tr.id]){setStatus('Receiving song buffer…',false);return}
   if(!dec[tr.id]){decode(tr.id).then(apply);return}
   const key=tr.id+'|'+state.anchorHost+'|'+$('#chan').value;
@@ -181,10 +250,18 @@ function begin(tr,key){
   stopAudio();
   const buf=dec[tr.id],src=ctx.createBufferSource();src.buffer=buf;
   const mode=$('#chan').value;
-  if(buf.numberOfChannels>1&&mode!=='both'){
-    const splitter=ctx.createChannelSplitter(2),merger=ctx.createChannelMerger(2);
-    src.connect(splitter);const ch=mode==='left'?0:1;
-    splitter.connect(merger,ch,0);splitter.connect(merger,ch,1);merger.connect(master);
+  if(mode!=='both'){
+    const merger=ctx.createChannelMerger(2),ch=mode==='left'?0:1;
+    if(buf.numberOfChannels>1){
+      // Stereo file: take the chosen channel and play it on both outputs of this device
+      const splitter=ctx.createChannelSplitter(2);
+      src.connect(splitter);
+      splitter.connect(merger,ch,0);splitter.connect(merger,ch,1);
+    }else{
+      // Mono file: hard-pan to the chosen side
+      src.connect(merger,0,ch);
+    }
+    merger.connect(master);
   }else src.connect(master);
   const w=(state.anchorHost-hostNow())/1000;
   let when,pos;
@@ -230,43 +307,86 @@ function drawVisualizer(){
   };loop()
 }
 
-/* YouTube */
+/* ---------- YouTube ---------- */
 window.onYouTubeIframeAPIReady=()=>{
+  if(ytPlayer)return;
   ytPlayer=new YT.Player('ytPlayer',{
     height:'100%',width:'100%',playerVars:{playsinline:1,controls:1,disablekb:1,fs:1,rel:0,autoplay:0},
     events:{
-      onReady:()=>{isYtReady=true},
+      onReady:()=>{
+        isYtReady=true;
+        if(cur()?.type==='youtube' && state.status==='playing') applyYouTubeSync(cur());
+      },
       onAutoplayBlocked:()=>{ytAutoplayBlocked=true;$('#ytEnable').classList.remove('hidden');setStatus('Tap Enable YouTube Playback',false)},
+      onError:()=>{ytLoadedFor=null;setStatus('YouTube could not play this video',false)},
       onStateChange:e=>{
         if(e.data===YT.PlayerState.ENDED&&isHost)next(1.5);
-        /* YouTube does not expose a supported generic ad-state API.
-           This hook is intentionally conservative; no ad-skipping/network interception is used. */
       }
     }
   })
 };
 
+// Best-effort ad detection: during ads the player usually reports a video id different from the queued one.
+// (There is no official ad API in the iframe player, so this can miss ads or rarely false-trigger.)
+setInterval(()=>{
+  if(!ytPlayer||!isYtReady||cur()?.type!=='youtube'||state.status!=='playing')return;
+  if(performance.now()-ytLoadStamp<2500)return;   // grace period right after load/cue
+  try{
+    const want=cur().ytId,vd=ytPlayer.getVideoData?.(),ps=ytPlayer.getPlayerState();
+    const active=ps===YT.PlayerState.PLAYING||ps===YT.PlayerState.BUFFERING;
+    const adNow=active&&!!vd?.video_id&&vd.video_id!==want;
+    if(adNow&&!ytAdMuted){
+      ytAdMuted=true;ytPlayer.mute();$('#ytAdStatus').classList.remove('hidden');
+    }else if(!adNow&&ytAdMuted){
+      ytAdMuted=false;ytPlayer.unMute();ytPlayer.setVolume(+$('input#vol').value);$('#ytAdStatus').classList.add('hidden');
+    }
+  }catch{}
+},500);
+
 function applyYouTubeSync(tr){
   if(!isYtReady||!ytPlayer)return;
   $('#visualizer').classList.add('hidden');$('#ytContainer').classList.remove('hidden');
-  const vd=ytPlayer.getVideoData?.(),loaded=vd?.video_id||null;
-  if(loaded!==tr.ytId){ytPlayer.loadVideoById(tr.ytId,Math.max(0,expectedPos()));return}
-  const target=Math.max(0,expectedPos()+nudge());
   const wait=(state.anchorHost-hostNow())/1000;
-  if(wait>0){countdown(wait*1000);try{ytPlayer.pauseVideo();ytPlayer.seekTo(state.anchorPos,true)}catch{};return}
+
+  // Before the shared start moment: cue/pause at the start position and fire play exactly at the anchor
+  if(wait>0){
+    countdown(wait*1000);
+    try{
+      if(ytLoadedFor!==tr.ytId){ytLoadedFor=tr.ytId;ytLoadStamp=performance.now();ytPlayer.cueVideoById(tr.ytId,state.anchorPos)}
+      else{ytPlayer.pauseVideo();ytPlayer.seekTo(state.anchorPos,true)}
+    }catch{}
+    clearTimeout(ytStartTimer);
+    ytStartTimer=setTimeout(()=>{
+      if(cur()!==tr||state.status!=='playing'||ytAutoplayBlocked)return;
+      try{ytPlayer.playVideo()}catch{}
+      setTimeout(apply,500);
+    },Math.max(0,wait*1000-120));   // start slightly early to offset player start-up latency
+    return;
+  }
+
+  // Joined / resumed after the anchor: load at the expected position
+  if(ytLoadedFor!==tr.ytId){
+    ytLoadedFor=tr.ytId;ytLoadStamp=performance.now();
+    try{ytPlayer.loadVideoById(tr.ytId,Math.max(0,expectedPos()-nudge()))}catch{}
+    return;
+  }
   if(ytAutoplayBlocked)return;
-  const ps=ytPlayer.getPlayerState();
-  if(ps!==YT.PlayerState.PLAYING&&ps!==YT.PlayerState.BUFFERING)try{ytPlayer.playVideo()}catch{}
-  const t=ytPlayer.getCurrentTime?.()||0;
-  if(Math.abs(t-target)>.3)try{ytPlayer.seekTo(target,true)}catch{}
-  if(!ytAdMuted)try{ytPlayer.setVolume(+$('input#vol').value)}catch{}
+  if(ytAdMuted)return;   // don't seek or restart while an ad is playing; resync when it ends
+  const target=Math.max(0,expectedPos()-nudge());
+  try{
+    const ps=ytPlayer.getPlayerState();
+    if(ps!==YT.PlayerState.PLAYING&&ps!==YT.PlayerState.BUFFERING)ytPlayer.playVideo();
+    const t=ytPlayer.getCurrentTime?.()||0;
+    if(Math.abs(t-target)>.3)ytPlayer.seekTo(target,true);
+    ytPlayer.unMute();ytPlayer.setVolume(+$('input#vol').value);
+  }catch{}
 }
 $('#ytEnable').onclick=()=>{ensureCtx();ytAutoplayBlocked=false;$('#ytEnable').classList.add('hidden');try{ytPlayer.unMute();ytPlayer.playVideo()}catch{}};
 
-/* Room / network */
+/* ---------- Host side ---------- */
 function hostRoom(id){
   isHost=true;roomId=id;offset=0;
-  const clean=id.replace('insync-',''),url=location.origin+location.pathname+'#join='+clean;
+  const clean=id.replace('insync-',''),url=location.href.split('#')[0]+'#join='+clean;
   $('#link').value=url;$('#qr').innerHTML='';
   new QRCode($('#qr'),{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
   setStatus('Host Room: '+clean);
@@ -274,6 +394,8 @@ function hostRoom(id){
   peer.on('connection',attachHostConnection);
   devCount();
 }
+
+function dropIncoming(c){Object.keys(inc).forEach(id=>{if(inc[id].from===c)delete inc[id]})}
 
 function attachHostConnection(c){
   c.on('open',()=>{
@@ -283,26 +405,44 @@ function attachHostConnection(c){
     state.queue.forEach(s=>{if(s.type!=='youtube'&&raw[s.id])sendLater(c,s.id)})
   });
   c.on('data',d=>handleHostData(c,d));
-  c.on('close',()=>{conns=conns.filter(x=>x!==c);devCount()});
+  c.on('close',()=>{conns=conns.filter(x=>x!==c);dropIncoming(c);devCount()});
   c.on('error',e=>console.warn('Peer connection error',e));
 }
 
 function handleHostData(c,d){
-  if(!d)return;
+  if(!d||typeof d!=='object')return;
   if(d.t==='ping'){c.send({t:'pong',c0:d.c0,h:wall()});return}
   if(d.t==='request_state'){c.send({t:'state',s:state});return}
-  if(d.t==='add_youtube'&&d.ytId){addYoutubeTrack(d.ytId);return}
-  if(d.t==='add_file_meta'&&d.meta){
-    const id=d.meta.id;inc[id]={parts:[],n:d.meta.n,from:c,meta:d.meta.track};
+
+  if(d.t==='add_youtube'){
+    if(typeof d.ytId==='string'&&YT_RE.test(d.ytId)&&state.queue.length<MAX_QUEUE)addYoutubeTrack(d.ytId,'Guest');
     return
   }
-  if(d.t==='chunk'&&inc[d.id]){
-    const x=inc[d.id];x.parts[d.i]=d.d;
-    if(x.parts.filter(Boolean).length===x.n){
+
+  if(d.t==='add_file_meta'&&d.meta&&typeof d.meta==='object'){
+    const m=d.meta,id=m.id,n=m.n;
+    if(typeof id!=='string'||!/^f[a-z0-9]{3,24}$/.test(id))return;
+    if(raw[id]||inc[id]||state.queue.some(s=>s.id===id))return;
+    if(!Number.isInteger(n)||n<1||n>MAX_CHUNKS)return;
+    if(state.queue.length>=MAX_QUEUE)return;
+    if(Object.values(inc).filter(x=>x.from===c).length>=2)return;
+    const name=String(m.track?.name||'Guest upload').slice(0,100);
+    inc[id]={parts:new Array(n),n,got:0,from:c,meta:{id,type:'file',name,addedBy:'Guest'}};
+    return
+  }
+
+  if(d.t==='chunk'){
+    const x=inc[d.id];
+    if(!x||x.from!==c||!Number.isInteger(d.i)||d.i<0||d.i>=x.n||x.parts[d.i])return;
+    const b=d.d;
+    if(!(b instanceof ArrayBuffer||ArrayBuffer.isView(b))||b.byteLength>CHUNK)return;
+    x.parts[d.i]=b;x.got++;
+    if(x.got===x.n){
+      const id=d.id;
       new Blob(x.parts).arrayBuffer().then(ab=>{
-        raw[d.id]=ab;state.queue.push(x.meta);delete inc[d.id];push();
-        conns.forEach(g=>{if(g!==x.from)sendLater(g,d.id)})
-      })
+        raw[id]=ab;state.queue.push(x.meta);delete inc[id];push();
+        conns.forEach(g=>{if(g!==x.from)sendLater(g,id)})
+      }).catch(()=>delete inc[id])
     }
   }
 }
@@ -311,10 +451,11 @@ function setupLocalBroadcast(id){
   try{
     localBC=new BroadcastChannel('insync_room_'+id);
     localBC.onmessage=e=>{
-      const d=e.data;if(!d)return;
+      const d=e.data;if(!d||typeof d!=='object')return;
       if(isHost){
         if(d.t==='ping')localBC.postMessage({t:'pong',c0:d.c0,h:wall(),target:d.sender});
         else if(d.t==='request_state')localBC.postMessage({t:'state',s:state});
+        else if(d.t==='add_youtube'&&typeof d.ytId==='string'&&YT_RE.test(d.ytId)&&state.queue.length<MAX_QUEUE)addYoutubeTrack(d.ytId,'Guest');
       }else handleGuestData(d);
     }
   }catch(e){console.warn('BroadcastChannel unavailable',e)}
@@ -331,13 +472,13 @@ function push(){broadcastState();apply()}
 function sendLater(c,id){c._q=(c._q||Promise.resolve()).then(()=>sendTrack(c,id)).catch(e=>console.warn(e))}
 async function sendTrack(c,id){
   const b=raw[id];if(!b||!c.open)return;
-  const N=16384,n=Math.ceil(b.byteLength/N);
+  const n=Math.ceil(b.byteLength/CHUNK);
   const track=state.queue.find(x=>x.id===id);
   c.send({t:'meta',id,n,track});
   for(let i=0;i<n;i++){
     while(c.open&&c.dataChannel?.bufferedAmount>65536)await new Promise(r=>setTimeout(r,10));
     if(!c.open)return;
-    c.send({t:'chunk',id,i,d:b.slice(i*N,(i+1)*N)})
+    c.send({t:'chunk',id,i,d:b.slice(i*CHUNK,(i+1)*CHUNK)})
   }
 }
 
@@ -355,7 +496,7 @@ function next(d=delay()){
   else{state.status='idle';state.index=-1;state.anchorPos=0;push()}
 }
 function removeAt(i){
-  if(!isHost)return;const target=state.queue[i];if(target)delete raw[target.id];
+  if(!isHost)return;const target=state.queue[i];if(target){delete raw[target.id];delete dec[target.id]}
   state.queue.splice(i,1);
   if(i<state.index)state.index--;else if(i===state.index){if(state.queue.length)playIndex(Math.min(i,state.queue.length-1));else{state.index=-1;state.status='idle'}}
   push()
@@ -363,51 +504,73 @@ function removeAt(i){
 
 function extractYtId(v){
   v=String(v).trim();
-  if(/^[A-Za-z0-9_-]{11}$/.test(v))return v;
-  const m=v.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
+  if(YT_RE.test(v))return v;
+  const m=v.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
   return m?m[1]:null
 }
-async function addYoutubeTrack(ytId){
+async function addYoutubeTrack(ytId,by='Host'){
   const id='t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   let name='YouTube Video ('+ytId+')';
-  try{const r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');if(r.ok){const d=await r.json();if(d.title)name=d.title}}catch{}
-  state.queue.push({id,type:'youtube',ytId,name,addedBy:isHost?'Host':'Guest'});
+  try{const r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');if(r.ok){const d=await r.json();if(d.title)name=String(d.title).slice(0,120)}}catch{}
+  state.queue.push({id,type:'youtube',ytId,name,addedBy:by});
   push()
 }
 
 function requestYoutube(ytId){
-  if(isHost)addYoutubeTrack(ytId);
+  if(isHost)addYoutubeTrack(ytId,'Host');
   else if(hostConn?.open)hostConn.send({t:'add_youtube',ytId});
   else if(localBC){localBC.postMessage({t:'add_youtube',ytId})}
 }
 
+/* ---------- Guest side ---------- */
 async function sendFileToHost(file){
+  if(!file.size)return;
+  if(file.size>MAX_UPLOAD){setStatus('File too large (max '+Math.round(MAX_UPLOAD/1048576)+' MB)',false);return}
+  if(!hostConn?.open){setStatus('Not connected to host',false);return}
   const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  const ab=await file.arrayBuffer();raw[id]=ab;
-  const track={id,type:'file',name:file.name.replace(/\.[^.]+$/,''),addedBy:'Guest'};
-  const N=16384,n=Math.ceil(ab.byteLength/N);
-  if(hostConn?.open){
-    hostConn.send({t:'add_file_meta',meta:{id,n,track}});
-    for(let i=0;i<n;i++){while(hostConn.dataChannel?.bufferedAmount>65536)await new Promise(r=>setTimeout(r,10));hostConn.send({t:'chunk',id,i,d:ab.slice(i*N,(i+1)*N)})}
-  }else{setStatus('Not connected to host',false);delete raw[id]}
+  uploading.add(id);
+  try{
+    const ab=await file.arrayBuffer();raw[id]=ab;
+    const n=Math.ceil(ab.byteLength/CHUNK);
+    hostConn.send({t:'add_file_meta',meta:{id,n,track:{name:file.name.replace(/\.[^.]+$/,'')}}});
+    for(let i=0;i<n;i++){
+      if(!hostConn?.open)throw new Error('connection closed');
+      while(hostConn.dataChannel?.bufferedAmount>65536)await new Promise(r=>setTimeout(r,10));
+      hostConn.send({t:'chunk',id,i,d:ab.slice(i*CHUNK,(i+1)*CHUNK)});
+      setStatus('Uploading '+Math.round((i+1)/n*100)+'%',false);
+    }
+    setStatus('Upload sent · waiting for host');
+  }catch(e){
+    uploading.delete(id);delete raw[id];setStatus('Upload failed',false)
+  }
 }
 
 function handleGuestData(d){
+  if(!d||typeof d!=='object')return;
   if(d.t==='pong'){
+    if(d.target!==undefined&&d.target!==bcId)return;   // BroadcastChannel pong meant for another tab
     const c1=wall(),rtt=c1-d.c0;
     if(rtt<bestRtt){bestRtt=rtt;offset=d.h-(d.c0+c1)/2}
     setStatus('Synced · RTT '+Math.round(bestRtt)+'ms')
   }else if(d.t==='state'){
+    if(!d.s||!Array.isArray(d.s.queue))return;
     state=d.s;
-    Object.keys(raw).forEach(id=>{if(!state.queue.some(s=>s.id===id))delete raw[id]});
+    for(const id of [...uploading])if(state.queue.some(s=>s.id===id))uploading.delete(id);
+    Object.keys(raw).forEach(id=>{
+      if(uploading.has(id))return;                       // don't delete a file we're still uploading
+      if(!state.queue.some(s=>s.id===id)){delete raw[id];delete dec[id]}
+    });
     apply()
   }else if(d.t==='meta'){
-    inc[d.id]={parts:[],n:d.n,meta:d.track}
+    inc[d.id]={parts:[],n:d.n,got:0,meta:d.track}
   }else if(d.t==='chunk'&&inc[d.id]){
-    const x=inc[d.id];x.parts[d.i]=d.d;
-    const got=x.parts.filter(Boolean).length;
-    setStatus('Downloading track '+Math.round(got/x.n*100)+'%',false);
-    if(got===x.n)new Blob(x.parts).arrayBuffer().then(ab=>{raw[d.id]=ab;delete inc[d.id];setStatus('Track Ready · Synced');apply()})
+    const x=inc[d.id];
+    if(!x.parts[d.i]){x.parts[d.i]=d.d;x.got++}
+    setStatus('Downloading track '+Math.round(x.got/x.n*100)+'%',false);
+    if(x.got===x.n){
+      const id=d.id;
+      new Blob(x.parts).arrayBuffer().then(ab=>{raw[id]=ab;delete inc[id];setStatus('Track Ready · Synced');apply()})
+    }
   }else if(d.t==='beep')beep(d.at)
 }
 
@@ -415,19 +578,46 @@ function syncClock(n=8){
   let i=0;const go=()=>{if(hostConn?.open){hostConn.send({t:'ping',c0:wall()});if(++i<n)setTimeout(go,80)}};go()
 }
 function syncClockLocal(n=8){
-  let i=0,id=Math.random();const go=()=>{if(localBC){localBC.postMessage({t:'ping',c0:wall(),sender:id});if(++i<n)setTimeout(go,80)}};go()
+  let i=0;const go=()=>{if(localBC){localBC.postMessage({t:'ping',c0:wall(),sender:bcId});if(++i<n)setTimeout(go,80)}};go()
 }
 
 function joinRoom(id){
   roomId=id;setupLocalBroadcast(id);
-  hostConn=peer.connect(id,{reliable:true});
-  hostConn.on('open',()=>{setStatus('Connected · Syncing Clock…');syncClock(20);hostConn.send({t:'request_state'})});
-  hostConn.on('data',handleGuestData);
-  hostConn.on('close',()=>setStatus('Host Disconnected',false));
-  hostConn.on('error',e=>setStatus('Connection Error',false));
-  clockTimer=setInterval(()=>{if(hostConn?.open)syncClock(6);else if(localBC)syncClockLocal(6)},25000)
+  connectHost(id);
+  clearInterval(clockTimer);
+  clockTimer=setInterval(()=>{
+    bestRtt=Infinity;   // FIX: re-measure from scratch so a stale offset can recover
+    if(hostConn?.open)syncClock(6);else if(localBC)syncClockLocal(6)
+  },25000)
 }
 
+function connectHost(id){
+  if(!peer||peer.destroyed)return;
+  const c=peer.connect(id,{reliable:true});
+  hostConn=c;
+  c.on('open',()=>{
+    retryCount=0;
+    setStatus('Connected · Syncing Clock…');
+    bestRtt=Infinity;syncClock(20);c.send({t:'request_state'})
+  });
+  c.on('data',handleGuestData);
+  c.on('close',()=>{if(hostConn!==c)return;setStatus('Host disconnected — retrying…',false);scheduleRetry()});
+  c.on('error',()=>{if(hostConn!==c)return;setStatus('Connection error — retrying…',false);scheduleRetry()});
+}
+
+function scheduleRetry(){
+  if(isHost||!roomId||retryTimer)return;
+  if(retryCount>=10){setStatus('Could not reach host',false);return}
+  retryCount++;
+  retryTimer=setTimeout(()=>{
+    retryTimer=null;
+    if(!peer||peer.destroyed)return;
+    if(peer.disconnected){try{peer.reconnect()}catch{}}
+    if(!hostConn?.open)connectHost(roomId)
+  },3000)
+}
+
+/* ---------- UI render ---------- */
 function render(){
   const q=$('#queue');$('#queueCount').textContent=state.queue.length+' tracks';
   if(!state.queue.length){q.innerHTML='<li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Add audio files or YouTube links.</li>'}
@@ -453,11 +643,13 @@ function render(){
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formatTime(s){s=Math.max(0,s||0);const m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+(x<10?'0':'')+x}
 
+/* ---------- UI events ---------- */
 $('#addYtBtn').onclick=()=>{const id=extractYtId($('#ytUrl').value);if(id){requestYoutube(id);$('#ytUrl').value=''}else alert('Please enter a valid YouTube Video Link or ID')};
 $('#files').onchange=async e=>{
   ensureCtx();
   for(const f of e.target.files){
     if(isHost){
+      if(state.queue.length>=MAX_QUEUE)break;
       const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
       raw[id]=await f.arrayBuffer();
       state.queue.push({id,type:'file',name:f.name.replace(/\.[^.]+$/,''),addedBy:'Host'});
@@ -468,34 +660,56 @@ $('#files').onchange=async e=>{
 };
 $('#play').onclick=()=>isHost&&togglePlay();
 $('#next').onclick=()=>isHost&&(ensureCtx(),next());
-$('#vol').oninput=e=>{if(master)master.gain.value=e.target.value/100;if(ytPlayer?.setVolume&&!ytAdMuted)ytPlayer.setVolume(+e.target.value);render()};
+$('#vol').oninput=e=>{if(master)master.gain.value=e.target.value/100;if(ytPlayer?.setVolume&&!ytAdMuted)try{ytPlayer.setVolume(+e.target.value)}catch{};render()};
 $('#nudge').oninput=render;
 $('#nudge').onchange=$('#chan').onchange=()=>{if(playNode)playNode.key='';apply()};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#link').value)}catch{const x=$('#link');x.select();document.execCommand('copy')}$('#copy').textContent='Copied!';setTimeout(()=>$('#copy').textContent='Copy',1500)};
 $('#test').onclick=()=>{ensureCtx();const at=hostNow()+2000;conns.forEach(c=>c.open&&c.send({t:'beep',at}));localBC?.postMessage({t:'beep',at});beep(at)};
+$('#audioNoticeBtn').onclick=()=>{ensureCtx();unlockAudio()};
 
+/* ---------- Startup / networking ---------- */
 function start(joinId){
   const room=joinId||'insync-'+code6();
-  peer=joinId?new Peer({debug:1,secure:true,port:443,config:{iceServers:[
-    {urls:'stun:stun.l.google.com:19302'},
-    {urls:'stun:global.stun.twilio.com:3478'}
-  ]}}):new Peer(room,{debug:1,secure:true,port:443,config:{iceServers:[
-    {urls:'stun:stun.l.google.com:19302'},
-    {urls:'stun:global.stun.twilio.com:3478'}
-  ]}});
-  peer.on('open',id=>joinId?joinRoom(joinId):hostRoom(id));
-  peer.on('error',e=>{
+  const opts={debug:1,secure:true,port:443,config:{iceServers:ICE_SERVERS}};
+  const p=joinId?new Peer(opts):new Peer(room,opts);
+  peer=p;
+  let opened=false;
+
+  p.on('open',id=>{
+    if(opened){   // re-fired after a signalling reconnect
+      if(isHost)setStatus('Host Room: '+id.replace('insync-',''));
+      else if(hostConn?.open)setStatus('Connected · Synced');
+      else scheduleRetry();
+      return
+    }
+    opened=true;
+    joinId?joinRoom(joinId):hostRoom(id)
+  });
+
+  // FIX: reconnect to the signalling server so new guests can still find the room
+  p.on('disconnected',()=>{
+    if(p!==peer||p.destroyed)return;
+    setStatus('Reconnecting…',false);
+    setTimeout(()=>{if(p===peer&&!p.destroyed&&p.disconnected){try{p.reconnect()}catch{}}},1000)
+  });
+
+  p.on('error',e=>{
     console.warn('PeerJS error',e);
-    if(e.type==='unavailable-id'&&!joinId){peer.destroy();start();return}
-    if(e.type==='peer-unavailable'){setStatus('Host unavailable',false)}
-    else if(e.type==='socket-error'||e.type==='disconnected'){setStatus('Network signaling error',false)}
+    if(p!==peer)return;
+    if(e.type==='unavailable-id'&&!joinId){p.destroy();start();return}
+    if(e.type==='peer-unavailable'){setStatus('Host unavailable — retrying…',false);scheduleRetry()}
+    else if(['socket-error','socket-closed','network','disconnected'].includes(e.type)){setStatus('Network signaling error — retrying…',false);scheduleRetry()}
     else setStatus('Error: '+e.type,false)
   });
+
+  clearInterval(peerWatch);
+  peerWatch=setInterval(()=>{if(p===peer&&!p.destroyed&&p.disconnected){try{p.reconnect()}catch{}}},10000);
 }
 
 function enter(joinId){
   ensureCtx();$('#landing').classList.add('hidden');$('#app').classList.remove('hidden');
   if(joinId)document.querySelectorAll('.hostonly').forEach(x=>x.classList.add('hidden'));
+  checkEnv();updateAudioNotice();
   start(joinId)
 }
 
@@ -508,16 +722,26 @@ async function scan(){
     const loop=async()=>{const r=await detector.detect(v).catch(()=>[]);if(r[0]){const id=toRoom(r[0].rawValue);if(id){stream.getTracks().forEach(t=>t.stop());box.classList.add('hidden');enter(id);return}}if(!box.classList.contains('hidden'))requestAnimationFrame(loop)};loop()
   }catch{alert('Could not access camera. Enter the room code manually.')}
 }
-function toRoom(v){const x=String(v).trim().toLowerCase().match(/(?:insync-)?([0-9]{6})/);return x?'insync-'+x[1]:null}
+
+// FIX: strict parsing — accept a "#join=123456" link, or a bare 6-digit / insync-123456 code, nothing else
+function toRoom(v){
+  v=String(v).trim().toLowerCase();
+  let m=v.match(/#join=(\d{6})(?!\d)/);
+  if(!m)m=v.match(/^(?:insync-)?(\d{6})$/);
+  return m?'insync-'+m[1]:null
+}
 $('#closeCamBtn').onclick=()=>{$('#cam').srcObject?.getTracks().forEach(t=>t.stop());$('#camContainer').classList.add('hidden')};
 $('#hostBtn').onclick=()=>enter();
 $('#scanBtn').onclick=scan;
 $('#code').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);
 $('#codeBtn').onclick=()=>{const id=toRoom($('#code').value);if(id)enter(id);else alert('Enter a valid 6-digit room code')};
 
-if(location.hash.startsWith('#join=')){const id=toRoom(location.hash.slice(6));if(id)enter(id)}
+if(location.hash.startsWith('#join=')){const id=toRoom(location.hash);if(id)enter(id)}
 setInterval(apply,1500);
 render();
+
+// FIX: if the YouTube API finished loading before our callback existed, start it manually
+if(window.YT&&window.YT.Player&&!ytPlayer)window.onYouTubeIframeAPIReady();
 </script>
 </body>
 </html>
