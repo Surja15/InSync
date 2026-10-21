@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
-  <title>InSync Stereo - Multi-Device Audio Synchronizer</title>
+  <title>InSync Stereo - Multi-Device Audio & Video Synchronizer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- YouTube IFrame Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
@@ -81,7 +83,7 @@
           <h1 class="text-lg font-extrabold tracking-tight leading-none text-white flex items-center gap-1.5">
             InSync <span class="gradient-text-glow">Stereo</span>
           </h1>
-          <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">Multi-Device Audio Sync Engine</p>
+          <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">Multi-Device Audio & Video Sync</p>
         </div>
       </div>
       
@@ -101,7 +103,7 @@
       </div>
       <h2 class="text-3xl font-extrabold tracking-tight text-white">Synchronize Your Sound</h2>
       <p class="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">
-        Pair two or more phones via Wi-Fi or Hotspot to play songs in perfect millisecond synchronization.
+        Pair two or more phones via Wi-Fi or Hotspot to play audio files or YouTube videos in perfect sync.
       </p>
     </div>
 
@@ -153,18 +155,23 @@
       </div>
     </div>
 
-    <!-- CANVAS AUDIO VISUALIZER -->
+    <!-- PLAYER / CANVAS AUDIO VISUALIZER / YOUTUBE PLAYER CONTAINER -->
     <div class="glass-panel rounded-3xl p-5 relative overflow-hidden">
       <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-2">
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span id="nowPlayingTitle" class="text-sm font-bold text-white truncate max-w-[200px] sm:max-w-[300px]">No Song Playing</span>
+          <span id="nowPlayingTitle" class="text-sm font-bold text-white truncate max-w-[200px] sm:max-w-[300px]">No Track Playing</span>
         </div>
         <span id="timeDisplay" class="text-xs font-mono text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">0:00 / 0:00</span>
       </div>
       
-      <!-- Visualizer Canvas -->
+      <!-- Visualizer Canvas for local audio -->
       <canvas id="visualizer" class="w-full h-24 rounded-2xl bg-slate-950/80 border border-slate-800/80 shadow-inner"></canvas>
+      
+      <!-- YouTube Embedded Video Container (hidden when playing local audio) -->
+      <div id="ytContainer" class="w-full hidden relative rounded-2xl overflow-hidden aspect-video border border-slate-800 bg-slate-950 mt-2">
+        <div id="ytPlayer"></div>
+      </div>
     </div>
 
     <!-- HOST PLAYER CONTROLS (Only visible to Host) -->
@@ -192,17 +199,31 @@
         </div>
       </div>
 
-      <!-- File Upload button -->
-      <div>
-        <label class="w-full py-3.5 px-4 rounded-2xl border-2 border-dashed border-slate-700 hover:border-blue-500/60 bg-slate-900/40 hover:bg-slate-900/80 text-slate-300 transition cursor-pointer flex items-center justify-center gap-2 text-sm font-semibold">
+      <!-- Add Track Section: YouTube or File Upload -->
+      <div class="space-y-3 pt-2 border-t border-slate-800/60">
+        <!-- YouTube URL Input -->
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <i class="fa-brands fa-youtube absolute left-3.5 top-3.5 text-red-500 text-base"></i>
+            <input id="ytUrl" type="text" placeholder="Paste YouTube Video Link or ID" 
+                   class="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 transition shadow-inner">
+          </div>
+          <button id="addYtBtn" class="px-4 py-3 rounded-2xl bg-red-600/80 hover:bg-red-600 border border-red-500/50 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shrink-0">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Video</span>
+          </button>
+        </div>
+
+        <!-- Local File Upload button -->
+        <label class="w-full py-3 px-4 rounded-2xl border border-dashed border-slate-700 hover:border-blue-500/60 bg-slate-900/40 hover:bg-slate-900/80 text-slate-300 transition cursor-pointer flex items-center justify-center gap-2 text-xs font-semibold">
           <i class="fa-solid fa-folder-plus text-blue-400"></i>
-          <span>Add Songs to Shared Queue</span>
+          <span>Or Upload Local Audio Files</span>
           <input type="file" id="files" accept="audio/*" multiple class="hidden">
         </label>
       </div>
     </section>
 
-    <!-- SONG QUEUE -->
+    <!-- SONG / VIDEO QUEUE -->
     <div class="glass-panel rounded-3xl p-5 space-y-3">
       <div class="flex justify-between items-center">
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -213,7 +234,7 @@
 
       <ul id="queue" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
         <!-- Playlist items injected dynamically -->
-        <li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Host needs to add audio files.</li>
+        <li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Add audio files or YouTube links.</li>
       </ul>
     </div>
 
@@ -227,7 +248,7 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Channel Mode (Stereo Splitter) -->
+        <!-- Channel Mode (Stereo Splitter - For local audio files) -->
         <div class="space-y-1.5">
           <label class="text-xs text-slate-400 font-semibold block">Stereo Output Channel</label>
           <select id="chan" class="w-full bg-slate-900 border border-slate-800 text-white text-xs rounded-xl p-3 focus:border-blue-500 focus:outline-none">
@@ -293,7 +314,7 @@
 
   <!-- APP FOOTER -->
   <footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-900/80 bg-slate-950/60 backdrop-blur-md">
-    InSync Stereo &bull; Low-Latency P2P WebRTC Audio Synchronizer &bull; <span class="text-slate-400 font-semibold">By Surja15</span>
+    InSync Stereo &bull; Low-Latency P2P WebRTC Audio & Video Synchronizer &bull; <span class="text-slate-400 font-semibold">By Surja15</span>
   </footer>
 
   <!-- JAVASCRIPT LOGIC ENGINE -->
@@ -324,6 +345,10 @@
     let cdTimer = null;
     let animFrame = null;
 
+    // YouTube Player Variables
+    let ytPlayer = null;
+    let isYtReady = false;
+
     // File Storage Buffers
     const raw = {};  // Raw ArrayBuffers
     const dec = {};  // Decoded AudioBuffers
@@ -332,6 +357,35 @@
     const inc = {};  // Incoming file transfer chunks
 
     let state = { queue: [], index: -1, status: 'idle', anchorHost: 0, anchorPos: 0 };
+
+    // YouTube API Initialization callback
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayer = new YT.Player('ytPlayer', {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+          'playsinline': 1,
+          'controls': 1,
+          'disablekb': 1,
+          'fs': 1,
+          'rel': 0,
+          'autoplay': 0
+        },
+        events: {
+          'onReady': () => { isYtReady = true; },
+          'onStateChange': (e) => {
+            // Optional: Handle manual user interactions if necessary
+          }
+        }
+      });
+    };
+
+    // Helper: Extract YouTube ID from link or input string
+    function extractYtId(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = String(url).trim().match(regExp);
+      return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
+    }
 
     // Update Status Badge UI
     const setStatus = (text, isOnline = true) => {
@@ -350,7 +404,7 @@
     const cur = () => state.queue[state.index];
     const code6 = () => Math.random().toString(36).substring(2, 8).toLowerCase();
 
-    /* ================= AUDIO ENGINE ================= */
+    /* ================= AUDIO & MEDIA ENGINE ================= */
     function ensureCtx() {
       if (!ctx) {
         ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
@@ -386,7 +440,7 @@
     }
 
     function trim() {
-      const keep = [cur(), state.queue[state.index + 1]].filter(Boolean).map(s => s.id);
+      const keep = [cur(), state.queue[state.index + 1]].filter(Boolean).filter(s => s.type !== 'youtube').map(s => s.id);
       Object.keys(dec).forEach(id => keep.includes(id) || delete dec[id]);
     }
 
@@ -399,6 +453,15 @@
         return; 
       }
       
+      // Handle YouTube Track Sync
+      if (tr.type === 'youtube') {
+        stopAudio();
+        applyYouTubeSync(tr);
+        return;
+      } else {
+        stopYouTube();
+      }
+
       trim();
       
       if (!dec[tr.id]) {
@@ -407,9 +470,9 @@
         return;
       }
 
-      // Pre-decode next track for zero-gap switching
+      // Pre-decode next audio track for zero-gap switching
       const nx = state.queue[state.index + 1]; 
-      if (nx) decode(nx.id);
+      if (nx && nx.type !== 'youtube') decode(nx.id);
 
       const key = tr.id + '|' + state.anchorHost + '|' + $('#chan').value;
       if (!play || play.key !== key) begin(tr, key); 
@@ -419,8 +482,62 @@
     // Dynamic state evaluation loop
     setInterval(apply, 1500);
 
+    /* ================= YOUTUBE SYNC LOGIC ================= */
+    function applyYouTubeSync(tr) {
+      if (!isYtReady || !ytPlayer || !ytPlayer.loadVideoById) return;
+
+      const visualizer = $('#visualizer');
+      const ytContainer = $('#ytContainer');
+      
+      visualizer.classList.add('hidden');
+      ytContainer.classList.remove('hidden');
+
+      const key = tr.ytId + '|' + state.anchorHost;
+      const currentVideoData = ytPlayer.getVideoData ? ytPlayer.getVideoData() : null;
+      const loadedId = currentVideoData ? currentVideoData.video_id : null;
+
+      // Load new video if changed
+      if (loadedId !== tr.ytId) {
+        ytPlayer.loadVideoById(tr.ytId, expectedPos());
+      }
+
+      // Sync playback state
+      const targetPos = Math.max(0, expectedPos() + nudge());
+      const w = (state.anchorHost - hostNow()) / 1000;
+
+      if (w > 0) {
+        countdown(w * 1000);
+        ytPlayer.pauseVideo();
+        ytPlayer.seekTo(state.anchorPos, true);
+      } else {
+        const playerState = ytPlayer.getPlayerState();
+        if (playerState !== YT.PlayerState.PLAYING && playerState !== YT.PlayerState.BUFFERING) {
+          ytPlayer.playVideo();
+        }
+
+        // Correct YouTube Time Drift
+        const ytTime = ytPlayer.getCurrentTime();
+        const drift = Math.abs(ytTime - targetPos);
+        if (drift > 0.3) {
+          ytPlayer.seekTo(targetPos, true);
+        }
+      }
+
+      // Apply volume
+      ytPlayer.setVolume($('#vol').value);
+    }
+
+    function stopYouTube() {
+      if (ytPlayer && ytPlayer.stopVideo && isYtReady) {
+        try { ytPlayer.stopVideo(); } catch {}
+      }
+      $('#ytContainer').classList.add('hidden');
+      $('#visualizer').classList.remove('hidden');
+    }
+
+    /* ================= AUDIO SYNC LOGIC ================= */
     function begin(tr, key) {
-      stop();
+      stopAudio();
       const buf = dec[tr.id];
       const mode = $('#chan').value;
       const src = ctx.createBufferSource(); 
@@ -498,12 +615,17 @@
       }
     }
 
-    function stop() {
+    function stopAudio() {
       if (play) { 
         play.src.onended = null; 
         try { play.src.stop(); } catch {} 
         play = null; 
       }
+    }
+
+    function stop() {
+      stopAudio();
+      stopYouTube();
       clearInterval(cdTimer); 
       $('#countContainer').classList.add('hidden');
     }
@@ -566,7 +688,7 @@
 
         ctx2d.clearRect(0, 0, width, height);
 
-        if (!analyser || state.status !== 'playing') {
+        if (!analyser || state.status !== 'playing' || (cur() && cur().type === 'youtube')) {
           // Idle state line
           ctx2d.beginPath();
           ctx2d.strokeStyle = '#334155';
@@ -632,7 +754,9 @@
             conns.push(c); 
             c.send({ t: 'state', s: state }); 
             devCount();
-            state.queue.forEach(s => sendLater(c, s.id));
+            state.queue.forEach(s => {
+              if (s.type !== 'youtube') sendLater(c, s.id);
+            });
           });
 
           c.on('data', d => { 
@@ -739,7 +863,8 @@
     }
 
     function removeAt(i) {
-      delete raw[state.queue[i].id];
+      const target = state.queue[i];
+      if (target && target.id) delete raw[target.id];
       state.queue.splice(i, 1);
       if (i < state.index) state.index--;
       else if (i === state.index) {
@@ -750,12 +875,42 @@
       push();
     }
 
+    // Add YouTube Video to Queue
+    async function addYoutubeTrack(ytId) {
+      ensureCtx();
+      const id = code6();
+      let title = 'YouTube Video (' + ytId + ')';
+
+      // Attempt to fetch title via oEmbed
+      try {
+        const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.title) title = data.title;
+        }
+      } catch (err) {}
+
+      state.queue.push({ id, type: 'youtube', ytId, name: title });
+      push();
+    }
+
+    $('#addYtBtn').onclick = () => {
+      const input = $('#ytUrl');
+      const ytId = extractYtId(input.value);
+      if (ytId) {
+        addYoutubeTrack(ytId);
+        input.value = '';
+      } else {
+        alert('Please enter a valid YouTube Video Link or ID');
+      }
+    };
+
     $('#files').onchange = async e => {
       ensureCtx();
       for (const f of e.target.files) {
         const id = code6();
         raw[id] = await f.arrayBuffer();
-        state.queue.push({ id, name: f.name.replace(/\.[^.]+$/, '') });
+        state.queue.push({ id, type: 'file', name: f.name.replace(/\.[^.]+$/, '') });
         push();
         conns.forEach(c => sendLater(c, id));
       }
@@ -865,12 +1020,13 @@
       $('#queueCount').textContent = state.queue.length + ' tracks';
 
       if (state.queue.length === 0) {
-        q.innerHTML = '<li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Host needs to add audio files.</li>';
+        q.innerHTML = '<li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Add audio files or YouTube links.</li>';
       } else {
         q.innerHTML = '';
         state.queue.forEach((s, i) => {
           const li = document.createElement('li');
           const isCurrent = i === state.index;
+          const isYt = s.type === 'youtube';
           
           li.className = `flex items-center justify-between p-3 rounded-2xl transition border ${
             isCurrent 
@@ -880,10 +1036,14 @@
 
           const nameSpan = document.createElement('span');
           nameSpan.className = 'text-xs truncate flex-1 flex items-center gap-2';
-          nameSpan.innerHTML = `
-            ${isCurrent ? '<i class="fa-solid fa-compact-disc animate-spin text-emerald-400"></i>' : '<i class="fa-solid fa-music text-slate-600"></i>'}
-            <span>${s.name}${raw[s.id] ? '' : ' <span class="text-amber-400 text-[10px]">(Loading...)</span>'}</span>
-          `;
+          
+          let icon = '<i class="fa-solid fa-music text-slate-600"></i>';
+          if (isYt) icon = '<i class="fa-brands fa-youtube text-red-500"></i>';
+          if (isCurrent) icon = '<i class="fa-solid fa-compact-disc animate-spin text-emerald-400"></i>';
+
+          const readyStatus = isYt || raw[s.id] ? '' : ' <span class="text-amber-400 text-[10px]">(Loading...)</span>';
+
+          nameSpan.innerHTML = `${icon} <span>${s.name}${readyStatus}</span>`;
 
           li.appendChild(nameSpan);
 
@@ -911,12 +1071,18 @@
       const currentTrack = cur();
       if (currentTrack) {
         $('#nowPlayingTitle').textContent = currentTrack.name;
-        if (play && play.duration) {
+        if (currentTrack.type === 'youtube') {
+          if (ytPlayer && ytPlayer.getDuration) {
+            const dur = ytPlayer.getDuration() || 0;
+            const currentPos = Math.min(dur, Math.max(0, expectedPos()));
+            $('#timeDisplay').textContent = formatTime(currentPos) + ' / ' + formatTime(dur);
+          }
+        } else if (play && play.duration) {
           const currentPos = Math.min(play.duration, Math.max(0, expectedPos()));
           $('#timeDisplay').textContent = formatTime(currentPos) + ' / ' + formatTime(play.duration);
         }
       } else {
-        $('#nowPlayingTitle').textContent = 'No Song Playing';
+        $('#nowPlayingTitle').textContent = 'No Track Playing';
         $('#timeDisplay').textContent = '0:00 / 0:00';
       }
 
@@ -936,6 +1102,7 @@
     $('#vol').oninput = e => {
       $('#volVal').textContent = e.target.value + '%';
       if (master) master.gain.value = e.target.value / 100;
+      if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(e.target.value);
     };
     $('#nudge').oninput = render;
     $('#nudge').onchange = $('#chan').onchange = () => { 
