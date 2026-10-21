@@ -9,1247 +9,515 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- YouTube IFrame Player API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
-    * {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Custom Glassmorphism & Visual Polish */
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-    }
-
-    .glass-card {
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .glow-accent {
-      box-shadow: 0 0 35px -5px rgba(59, 130, 246, 0.35);
-    }
-
-    .glow-green {
-      box-shadow: 0 0 35px -5px rgba(34, 197, 94, 0.35);
-    }
-
-    /* Range slider custom styling */
-    input[type=range] {
-      accent-color: #3b82f6;
-    }
-
-    /* Hide scrollbars for clean UI */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* Animated gradient text glow */
-    .gradient-text-glow {
-      background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 2px 10px rgba(59, 130, 246, 0.3));
-    }
-
-    #qr canvas, #qr img {
-      margin: auto;
-      border-radius: 12px;
-    }
+    *{font-family:'Plus Jakarta Sans',sans-serif;user-select:none;-webkit-tap-highlight-color:transparent}
+    .glass-panel{background:rgba(15,23,42,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 40px -15px rgba(0,0,0,.5)}
+    .glass-card{background:rgba(30,41,59,.5);border:1px solid rgba(255,255,255,.06)}
+    input[type=range]{accent-color:#3b82f6}
+    .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    .gradient-text-glow{background:linear-gradient(135deg,#60a5fa 0%,#34d399 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(59,130,246,.3))}
+    #qr canvas,#qr img{margin:auto;border-radius:12px}
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
 
-  <!-- TOP APP HEADER -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 py-3 sm:px-6">
-    <div class="max-w-xl mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-emerald-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-blue-500/25">
-          <i class="fa-solid fa-bolt text-lg"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-extrabold tracking-tight leading-none text-white flex items-center gap-1.5">
-            InSync <span class="gradient-text-glow">Stereo</span>
-          </h1>
-          <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">Multi-Device Audio & Video Sync</p>
-        </div>
-      </div>
-      
-      <!-- Connection Status Badge -->
-      <div id="statusBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900/90 border border-slate-800 text-slate-300 shadow-inner">
-        <span id="statusDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-        <span id="status">Standby</span>
-      </div>
+<header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 py-3 sm:px-6">
+  <div class="max-w-xl mx-auto flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-emerald-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-blue-500/25"><i class="fa-solid fa-bolt text-lg"></i></div>
+      <div><h1 class="text-lg font-extrabold tracking-tight leading-none text-white flex items-center gap-1.5">InSync <span class="gradient-text-glow">Stereo</span></h1><p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">Multi-Device Audio & Video Sync</p></div>
     </div>
-  </header>
+    <div id="statusBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900/90 border border-slate-800 text-slate-300 shadow-inner"><span id="statusDot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="status">Standby</span></div>
+  </div>
+</header>
 
-  <!-- LANDING / PAIRING SCREEN -->
-  <div id="landing" class="max-w-md w-full mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
-    <div class="text-center mb-8 space-y-3">
-      <div class="inline-flex p-5 rounded-3xl bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-1 shadow-inner">
-        <i class="fa-solid fa-tower-broadcast text-4xl text-blue-400"></i>
-      </div>
-      <h2 class="text-3xl font-extrabold tracking-tight text-white">Synchronize Your Sound</h2>
-      <p class="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">
-        Pair two or more phones via Wi-Fi or Hotspot to play audio files or YouTube videos in perfect sync.
-      </p>
-    </div>
-
-    <div class="space-y-3.5">
-      <!-- Host Button -->
-      <button id="hostBtn" class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 active:scale-[0.98] transition font-bold text-white shadow-xl shadow-blue-500/25 flex items-center justify-center gap-3 group">
-        <i class="fa-solid fa-wifi text-lg group-hover:scale-110 transition-transform"></i>
-        <span>Host a Sync Session</span>
-      </button>
-
-      <div class="relative my-5 flex items-center justify-center">
-        <div class="border-t border-slate-800/80 w-full"></div>
-        <span class="bg-slate-950 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">or join existing</span>
-      </div>
-
-      <!-- Scan QR Button -->
-      <button id="scanBtn" class="w-full py-3.5 px-5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 active:scale-[0.98] transition font-semibold text-slate-200 flex items-center justify-center gap-2 shadow-sm">
-        <i class="fa-solid fa-qrcode text-emerald-400"></i>
-        <span>Scan QR Code to Join</span>
-      </button>
-
-      <!-- Room Code Input -->
-      <div class="flex gap-2 pt-1">
-        <input id="code" type="text" uppercase placeholder="Enter 6-digit Code" maxlength="6" 
-               class="flex-1 px-4 py-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-center text-sm font-mono tracking-widest text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition shadow-inner">
-        <button id="codeBtn" class="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-white font-bold text-sm transition active:scale-[0.98]">
-          Join
-        </button>
-      </div>
-    </div>
-
-    <!-- Camera Viewfinder for QR Scan -->
-    <div id="camContainer" class="mt-4 hidden relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
-      <video id="cam" class="w-full h-48 object-cover" playsinline muted></video>
-      <button id="closeCamBtn" class="absolute top-2 right-2 bg-slate-900/80 p-2 rounded-full text-xs text-white backdrop-blur-sm">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+<div id="landing" class="max-w-md w-full mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
+  <div class="text-center mb-8 space-y-3">
+    <div class="inline-flex p-5 rounded-3xl bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-1 shadow-inner"><i class="fa-solid fa-tower-broadcast text-4xl"></i></div>
+    <h2 class="text-3xl font-extrabold tracking-tight text-white">Synchronize Your Sound</h2>
+    <p class="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">Pair two or more phones via Wi-Fi, Hotspot or Internet to play local audio or YouTube videos in sync.</p>
+  </div>
+  <div class="space-y-3.5">
+    <button id="hostBtn" class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 active:scale-[.98] transition font-bold text-white shadow-xl shadow-blue-500/25 flex items-center justify-center gap-3"><i class="fa-solid fa-wifi text-lg"></i><span>Host a Sync Session</span></button>
+    <div class="relative my-5 flex items-center justify-center"><div class="border-t border-slate-800/80 w-full"></div><span class="bg-slate-950 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">or join existing</span></div>
+    <button id="scanBtn" class="w-full py-3.5 px-5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 active:scale-[.98] transition font-semibold text-slate-200 flex items-center justify-center gap-2"><i class="fa-solid fa-qrcode text-emerald-400"></i><span>Scan QR Code to Join</span></button>
+    <div class="flex gap-2 pt-1">
+      <input id="code" type="text" inputmode="numeric" placeholder="Enter 6-digit Code" maxlength="6" class="flex-1 px-4 py-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-center text-sm font-mono tracking-widest text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+      <button id="codeBtn" class="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-white font-bold text-sm transition">Join</button>
     </div>
   </div>
+  <div id="camContainer" class="mt-4 hidden relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
+    <video id="cam" class="w-full h-48 object-cover" playsinline muted></video>
+    <button id="closeCamBtn" class="absolute top-2 right-2 bg-slate-900/80 p-2 rounded-full text-xs text-white"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+</div>
 
-  <!-- MAIN SYNC PLAYER APP -->
-  <main id="app" class="max-w-xl w-full mx-auto px-4 py-4 space-y-4 flex-1 hidden">
+<main id="app" class="max-w-xl w-full mx-auto px-4 py-4 space-y-4 flex-1 hidden">
+  <div id="countContainer" class="hidden text-center py-2"><div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"><span class="text-xs font-bold uppercase tracking-wider">Syncing Start In</span><span id="count" class="text-2xl font-black font-mono">3</span></div></div>
 
-    <!-- COUNTDOWN OVERLAY / DISPLAY -->
-    <div id="countContainer" class="hidden text-center py-2">
-      <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10">
-        <span class="text-xs font-bold uppercase tracking-wider">Syncing Start In</span>
-        <span id="count" class="text-2xl font-black font-mono">3</span>
-      </div>
+  <div class="glass-panel rounded-3xl p-5 relative overflow-hidden">
+    <div class="flex justify-between items-center mb-3">
+      <div class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span><span id="nowPlayingTitle" class="text-sm font-bold text-white truncate max-w-[200px] sm:max-w-[300px]">No Track Playing</span></div>
+      <span id="timeDisplay" class="text-xs font-mono text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">0:00 / 0:00</span>
     </div>
+    <canvas id="visualizer" class="w-full h-24 rounded-2xl bg-slate-950/80 border border-slate-800/80"></canvas>
+    <div id="ytContainer" class="w-full hidden relative rounded-2xl overflow-hidden aspect-video border border-slate-800 bg-slate-950 mt-2"><div id="ytPlayer"></div></div>
+    <button id="ytEnable" class="hidden mt-3 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Enable YouTube Playback</button>
+    <p id="ytAdStatus" class="hidden text-[10px] text-center text-slate-500 mt-2">YouTube playback muted during detected advertising.</p>
+  </div>
 
-    <!-- PLAYER / CANVAS AUDIO VISUALIZER / YOUTUBE PLAYER CONTAINER -->
-    <div class="glass-panel rounded-3xl p-5 relative overflow-hidden">
-      <div class="flex justify-between items-center mb-3">
-        <div class="flex items-center gap-2">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span id="nowPlayingTitle" class="text-sm font-bold text-white truncate max-w-[200px] sm:max-w-[300px]">No Track Playing</span>
-        </div>
-        <span id="timeDisplay" class="text-xs font-mono text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">0:00 / 0:00</span>
-      </div>
-      
-      <!-- Visualizer Canvas for local audio -->
-      <canvas id="visualizer" class="w-full h-24 rounded-2xl bg-slate-950/80 border border-slate-800/80 shadow-inner"></canvas>
-      
-      <!-- YouTube Embedded Video Container (hidden when playing local audio) -->
-      <div id="ytContainer" class="w-full hidden relative rounded-2xl overflow-hidden aspect-video border border-slate-800 bg-slate-950 mt-2">
-        <div id="ytPlayer"></div>
-      </div>
+  <section class="hostonly glass-panel rounded-3xl p-5 space-y-4">
+    <div class="flex items-center justify-between gap-3">
+      <button id="play" class="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-400 hover:opacity-95 active:scale-95 transition font-bold text-slate-950 flex items-center justify-center gap-2"><i id="playIcon" class="fa-solid fa-play text-lg"></i><span id="playText">Play Session</span></button>
+      <button id="next" class="px-5 py-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/60 text-white font-semibold flex items-center gap-2"><i class="fa-solid fa-forward-step"></i><span class="hidden sm:inline">Next</span></button>
+      <div class="flex flex-col items-end text-xs"><span class="text-slate-400 font-medium mb-1">Sync Delay</span><select id="delay" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2.5"><option value="2">2s Delay</option><option value="3" selected>3s Delay</option><option value="5">5s Delay</option></select></div>
     </div>
+  </section>
 
-    <!-- HOST PLAYER CONTROLS (Only visible to Host) -->
-    <section class="hostonly glass-panel rounded-3xl p-5 space-y-4">
-      <!-- Main Playback Controls -->
-      <div class="flex items-center justify-between gap-3">
-        <button id="play" class="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-400 hover:opacity-95 active:scale-95 transition font-bold text-slate-950 flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25">
-          <i id="playIcon" class="fa-solid fa-play text-lg"></i>
-          <span id="playText">Play All</span>
-        </button>
-
-        <button id="next" class="px-5 py-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/60 active:scale-95 transition text-white font-semibold flex items-center gap-2 shadow-md">
-          <i class="fa-solid fa-forward-step"></i>
-          <span class="hidden sm:inline">Next</span>
-        </button>
-
-        <!-- Delay Buffer Selector -->
-        <div class="flex flex-col items-end text-xs">
-          <span class="text-slate-400 font-medium mb-1">Sync Delay</span>
-          <select id="delay" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500">
-            <option value="2">2s Delay</option>
-            <option value="3" selected>3s Delay</option>
-            <option value="5">5s Delay</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Add Track Section: YouTube or File Upload -->
-      <div class="space-y-3 pt-2 border-t border-slate-800/60">
-        <!-- YouTube URL Input -->
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <i class="fa-brands fa-youtube absolute left-3.5 top-3.5 text-red-500 text-base"></i>
-            <input id="ytUrl" type="text" placeholder="Paste YouTube Video Link or ID" 
-                   class="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 transition shadow-inner">
-          </div>
-          <button id="addYtBtn" class="px-4 py-3 rounded-2xl bg-red-600/80 hover:bg-red-600 border border-red-500/50 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shrink-0">
-            <i class="fa-solid fa-plus"></i>
-            <span>Add Video</span>
-          </button>
-        </div>
-
-        <!-- Local File Upload button -->
-        <label class="w-full py-3 px-4 rounded-2xl border border-dashed border-slate-700 hover:border-blue-500/60 bg-slate-900/40 hover:bg-slate-900/80 text-slate-300 transition cursor-pointer flex items-center justify-center gap-2 text-xs font-semibold">
-          <i class="fa-solid fa-folder-plus text-blue-400"></i>
-          <span>Or Upload Local Audio Files</span>
-          <input type="file" id="files" accept="audio/*" multiple class="hidden">
-        </label>
-      </div>
-    </section>
-
-    <!-- SONG / VIDEO QUEUE -->
-    <div class="glass-panel rounded-3xl p-5 space-y-3">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-          <i class="fa-solid fa-list-ul text-blue-400"></i> Shared Playlist Queue
-        </h3>
-        <span id="queueCount" class="text-xs font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">0 tracks</span>
-      </div>
-
-      <ul id="queue" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
-        <!-- Playlist items injected dynamically -->
-        <li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Add audio files or YouTube links.</li>
-      </ul>
+  <section class="glass-panel rounded-3xl p-5 space-y-3">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2"><i class="fa-solid fa-plus text-blue-400"></i> Add To Shared Queue</h3>
+    <div class="flex gap-2">
+      <input id="ytUrl" type="text" placeholder="YouTube Video Link or ID" class="flex-1 pl-4 pr-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500">
+      <button id="addYtBtn" class="px-4 py-3 rounded-2xl bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs flex items-center gap-1.5"><i class="fa-brands fa-youtube"></i><span>Add</span></button>
     </div>
+    <label class="w-full py-3 px-4 rounded-2xl border border-dashed border-slate-700 hover:border-blue-500/60 bg-slate-900/40 text-slate-300 cursor-pointer flex items-center justify-center gap-2 text-xs font-semibold">
+      <i class="fa-solid fa-folder-plus text-blue-400"></i><span>Upload Local Audio</span><input type="file" id="files" accept="audio/*" multiple class="hidden">
+    </label>
+    <p id="addHint" class="text-[10px] text-slate-500 text-center">Everyone in the room can add tracks. The host controls playback.</p>
+  </section>
 
-    <!-- DEVICE PER-CHANNEL & LATENCY CONFIG -->
-    <section class="glass-panel rounded-3xl p-5 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800/80 pb-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-blue-400"></i> Local Device Output Settings
-        </h3>
-        <span class="text-[10px] bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800 text-slate-400 font-semibold">Individual Device Control</span>
-      </div>
+  <div class="glass-panel rounded-3xl p-5 space-y-3">
+    <div class="flex justify-between items-center"><h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2"><i class="fa-solid fa-list-ul text-blue-400"></i> Shared Playlist Queue</h3><span id="queueCount" class="text-xs font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">0 tracks</span></div>
+    <ul id="queue" class="space-y-2 max-h-56 overflow-y-auto no-scrollbar"></ul>
+  </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Channel Mode (Stereo Splitter - For local audio files) -->
-        <div class="space-y-1.5">
-          <label class="text-xs text-slate-400 font-semibold block">Stereo Output Channel</label>
-          <select id="chan" class="w-full bg-slate-900 border border-slate-800 text-white text-xs rounded-xl p-3 focus:border-blue-500 focus:outline-none">
-            <option value="both" selected>Both (Full Stereo)</option>
-            <option value="left">Left Channel Only</option>
-            <option value="right">Right Channel Only</option>
-          </select>
-        </div>
+  <section class="glass-panel rounded-3xl p-5 space-y-4">
+    <div class="flex justify-between items-center border-b border-slate-800/80 pb-3"><h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2"><i class="fa-solid fa-sliders text-blue-400"></i> Local Device Output</h3><span class="text-[10px] bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800 text-slate-400 font-semibold">This device only</span></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="space-y-1.5"><label class="text-xs text-slate-400 font-semibold block">Stereo Output Channel</label><select id="chan" class="w-full bg-slate-900 border border-slate-800 text-white text-xs rounded-xl p-3"><option value="both" selected>Both (Full Stereo)</option><option value="left">Left Channel Only</option><option value="right">Right Channel Only</option></select></div>
+      <div class="space-y-1.5"><div class="flex justify-between text-xs"><label class="text-slate-400 font-semibold">Volume</label><span id="volVal" class="text-slate-300 font-mono">100%</span></div><input type="range" id="vol" min="0" max="100" value="100" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer mt-2"></div>
+    </div>
+    <div class="space-y-1.5 pt-3 border-t border-slate-800/60"><div class="flex justify-between text-xs"><label class="text-slate-400 font-semibold">Fine-Tune Sync Offset</label><span class="text-blue-400 font-mono font-bold"><span id="nv">0</span> ms</span></div><input type="range" id="nudge" min="-300" max="300" value="0" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer"><p class="text-[10px] text-slate-500">Adjust if this device lags (+) or plays earlier (−).</p></div>
+    <button id="test" class="hostonly w-full py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-800"><i class="fa-solid fa-wave-square text-emerald-400"></i><span>Broadcast Sync Calibration Clicks</span></button>
+  </section>
 
-        <!-- Volume Control -->
-        <div class="space-y-1.5">
-          <div class="flex justify-between text-xs">
-            <label class="text-slate-400 font-semibold">Volume</label>
-            <span id="volVal" class="text-slate-300 font-mono">100%</span>
-          </div>
-          <input type="range" id="vol" min="0" max="100" value="100" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer mt-2">
-        </div>
-      </div>
+  <section id="invite" class="hostonly glass-panel rounded-3xl p-5 space-y-3">
+    <div class="flex justify-between items-center"><h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2"><i class="fa-solid fa-user-plus text-emerald-400"></i> Connect Guest Devices</h3><span id="devs" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">1 Device Active</span></div>
+    <div class="flex flex-col sm:flex-row gap-4 items-center pt-2">
+      <div id="qr" class="p-3 bg-white rounded-2xl shadow-lg shrink-0 flex items-center justify-center"></div>
+      <div class="space-y-2 w-full"><p class="text-xs text-slate-400">Scan QR with another device or copy room link:</p><div class="flex gap-2"><input id="link" readonly type="text" class="flex-1 bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 font-mono"><button id="copy" class="px-3 py-2.5 bg-slate-800 text-xs font-bold rounded-xl text-white">Copy</button></div></div>
+    </div>
+  </section>
+</main>
 
-      <!-- Fine Tune Delay Compensation -->
-      <div class="space-y-1.5 pt-3 border-t border-slate-800/60">
-        <div class="flex justify-between text-xs">
-          <label class="text-slate-400 font-semibold">Fine-Tune Sync Offset (Latency Tuning)</label>
-          <span class="text-blue-400 font-mono font-bold"><span id="nv">0</span> ms</span>
-        </div>
-        <input type="range" id="nudge" min="-300" max="300" value="0" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer">
-        <p class="text-[10px] text-slate-500">Adjust if this device lags (+) or plays earlier (−) than others.</p>
-      </div>
+<footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-900/80 bg-slate-950/60">InSync Stereo &bull; P2P Audio & Video Synchronizer &bull; <span class="text-slate-400 font-semibold">By Surja15</span></footer>
 
-      <!-- Audio Calibration Test Clicker -->
-      <button id="test" class="hostonly w-full py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-800 shadow-sm">
-        <i class="fa-solid fa-wave-square text-emerald-400"></i>
-        <span>Broadcast Sync Calibration Clicks</span>
-      </button>
-    </section>
+<script>
+const $=s=>document.querySelector(s);
+const wall=()=>performance.timeOrigin+performance.now();
 
-    <!-- HOST INVITE MODAL / CARD -->
-    <section id="invite" class="hostonly glass-panel rounded-3xl p-5 space-y-3">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-          <i class="fa-solid fa-user-plus text-emerald-400"></i> Connect Guest Devices
-        </h3>
-        <span id="devs" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          1 Device
-        </span>
-      </div>
+let peer=null,isHost=false,conns=[],hostConn=null,offset=0,bestRtt=Infinity;
+let localBC=null,isLocalBCMode=false,roomId=null,clockTimer=null;
+let ctx=null,master=null,analyser=null,playNode=null,cdTimer=null,animFrame=null;
+let ytPlayer=null,isYtReady=false,ytAutoplayBlocked=false,ytAdMuted=false;
+const raw={}; const dec={}; const pend={}; const bad={}; const inc={};
+let state={queue:[],index:-1,status:'idle',anchorHost:0,anchorPos:0};
 
-      <div class="flex flex-col sm:flex-row gap-4 items-center pt-2">
-        <div id="qr" class="p-3 bg-white rounded-2xl shadow-lg shrink-0 flex items-center justify-center border border-slate-200"></div>
-        <div class="space-y-2 w-full">
-          <p class="text-xs text-slate-400">Scan QR with guest device or copy room link:</p>
-          <div class="flex gap-2">
-            <input id="link" readonly type="text" class="flex-1 bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 font-mono focus:outline-none">
-            <button id="copy" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-xs font-bold rounded-xl text-white transition active:scale-95 shadow-sm">
-              Copy
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
+const hostNow=()=>wall()+offset;
+const nudge=()=>+$('#nudge').value/1000;
+const lat=()=>ctx?.outputLatency||0;
+const cur=()=>state.queue[state.index];
+const expectedPos=()=>state.anchorPos+Math.max(0,(hostNow()-state.anchorHost)/1000);
+const delay=()=>+$('select#delay').value;
+const code6=()=>String(Math.floor(100000+Math.random()*900000));
 
-  </main>
+function setStatus(text,online=true){
+  $('#status').textContent=text;
+  $('#statusDot').className=online?'w-2 h-2 rounded-full bg-emerald-400 animate-pulse':'w-2 h-2 rounded-full bg-amber-400';
+}
 
-  <!-- APP FOOTER -->
-  <footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-900/80 bg-slate-950/60 backdrop-blur-md">
-    InSync Stereo &bull; Low-Latency P2P WebRTC Audio & Video Synchronizer &bull; <span class="text-slate-400 font-semibold">By Surja15</span>
-  </footer>
+function ensureCtx(){
+  if(!ctx){
+    ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+    master=ctx.createGain(); master.gain.value=+$('input#vol').value/100;
+    analyser=ctx.createAnalyser(); analyser.fftSize=128;
+    master.connect(analyser); analyser.connect(ctx.destination); drawVisualizer();
+  }
+  if(ctx.state!=='running')ctx.resume().catch(()=>{});
+  if(navigator.wakeLock?.request)navigator.wakeLock.request('screen').catch(()=>{});
+}
 
-  <!-- JAVASCRIPT LOGIC ENGINE -->
-  <script>
-    // Utility Selector
-    const $ = s => document.querySelector(s);
-    const wall = () => performance.timeOrigin + performance.now(); // High-precision epoch timestamp
+function decode(id){
+  if(dec[id]||bad[id]||!raw[id])return Promise.resolve();
+  return pend[id]??=ctx.decodeAudioData(raw[id].slice(0)).then(b=>dec[id]=b).catch(()=>{bad[id]=1;setStatus('Failed to decode track',false)}).finally(()=>delete pend[id]);
+}
 
-    // App State Variables
-    let peer = null;
-    let isHost = false;
-    let conns = [];
-    let hostConn = null;
-    let offset = 0; // Clock offset: hostTime = wall() + offset
-    let bestRtt = Infinity;
+function stopAudio(){
+  if(playNode){playNode.src.onended=null;try{playNode.src.stop()}catch{};playNode=null}
+}
+function stopYouTube(){
+  if(ytPlayer&&isYtReady)try{ytPlayer.pauseVideo()}catch{}
+  $('#ytContainer').classList.add('hidden');$('#visualizer').classList.remove('hidden');
+}
+function stop(){
+  stopAudio();stopYouTube();clearInterval(cdTimer);$('#countContainer').classList.add('hidden');
+}
 
-    // Local Fallback Broadcast Channel for iFrame / Canvas Sandbox restriction bypass
-    let localBC = null;
-    let isLocalBCMode = false;
+function apply(){
+  render();
+  const tr=cur();
+  if(!ctx||!tr||state.status!=='playing'){if(state.status!=='playing')stop();return}
+  if(tr.type==='youtube'){stopAudio();applyYouTubeSync(tr);return}
+  stopYouTube();
+  if(!raw[tr.id]){setStatus('Receiving song buffer…',false);return}
+  if(!dec[tr.id]){decode(tr.id).then(apply);return}
+  const key=tr.id+'|'+state.anchorHost+'|'+$('#chan').value;
+  if(!playNode||playNode.key!==key)begin(tr,key);else correct();
+}
 
-    const hostNow = () => wall() + offset;
+function begin(tr,key){
+  stopAudio();
+  const buf=dec[tr.id],src=ctx.createBufferSource();src.buffer=buf;
+  const mode=$('#chan').value;
+  if(buf.numberOfChannels>1&&mode!=='both'){
+    const splitter=ctx.createChannelSplitter(2),merger=ctx.createChannelMerger(2);
+    src.connect(splitter);const ch=mode==='left'?0:1;
+    splitter.connect(merger,ch,0);splitter.connect(merger,ch,1);merger.connect(master);
+  }else src.connect(master);
+  const w=(state.anchorHost-hostNow())/1000;
+  let when,pos;
+  if(w>0){when=ctx.currentTime+w+nudge()-lat();pos=state.anchorPos;countdown(w*1000)}
+  else{when=ctx.currentTime;pos=expectedPos()-nudge()+lat()}
+  const d=when-ctx.currentTime;
+  if(d<0){pos-=d;when=ctx.currentTime}
+  if(pos>=buf.duration){if(isHost)next(1.5);return}
+  src.start(when,pos);
+  playNode={key,src,baseCtx:when,basePos:pos,rate:1,duration:buf.duration};
+  src.onended=()=>{if(playNode?.src===src){playNode=null;if(isHost)next(1.5)}};
+}
 
-    // Web Audio Variables
-    let ctx = null;
-    let master = null;
-    let analyser = null;
-    let play = null;
-    let cdTimer = null;
-    let animFrame = null;
+function correct(){
+  if(!playNode||ctx.currentTime<playNode.baseCtx+.5)return;
+  const pos=playNode.basePos+(ctx.currentTime-playNode.baseCtx)*playNode.rate;
+  const drift=pos-(expectedPos()-nudge()+lat());
+  if(Math.abs(drift)>.25){playNode.key='';apply();return}
+  const r=Math.abs(drift)>.004?1-Math.max(-.005,Math.min(.005,drift*.25)):1;
+  if(r!==playNode.rate){playNode.basePos=pos;playNode.baseCtx=ctx.currentTime;playNode.rate=r;playNode.src.playbackRate.value=r}
+}
 
-    // YouTube Player Variables
-    let ytPlayer = null;
-    let isYtReady = false;
+function countdown(ms){
+  clearInterval(cdTimer);const c=$('#countContainer'),el=$('#count'),end=performance.now()+ms;c.classList.remove('hidden');
+  const tick=()=>{const r=end-performance.now();if(r<=0){c.classList.add('hidden');clearInterval(cdTimer);return}el.textContent=(r/1000).toFixed(1)+'s'};tick();cdTimer=setInterval(tick,50)
+}
 
-    // File Storage Buffers
-    const raw = {};  // Raw ArrayBuffers
-    const dec = {};  // Decoded AudioBuffers
-    const pend = {}; // Pending decoding promises
-    const bad = {};  // Un-decodable files
-    const inc = {};  // Incoming file transfer chunks
+function beep(at){
+  ensureCtx();
+  for(let i=0;i<4;i++){
+    const when=ctx.currentTime+(at-hostNow())/1000+i*.5+nudge()-lat();if(when<=ctx.currentTime)continue;
+    const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=i===3?1200:800;g.gain.setValueAtTime(.5,when);g.gain.exponentialRampToValueAtTime(.001,when+.08);o.connect(g);g.connect(master);o.start(when);o.stop(when+.1)
+  }
+}
 
-    let state = { queue: [], index: -1, status: 'idle', anchorHost: 0, anchorPos: 0 };
+function drawVisualizer(){
+  const canvas=$('#visualizer'),c=canvas.getContext('2d');
+  const loop=()=>{animFrame=requestAnimationFrame(loop);if(canvas.width!==canvas.clientWidth||canvas.height!==canvas.clientHeight){canvas.width=canvas.clientWidth;canvas.height=canvas.clientHeight}
+    const w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);
+    if(!analyser||state.status!=='playing'||cur()?.type==='youtube'){c.beginPath();c.strokeStyle='#334155';c.lineWidth=2;c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();return}
+    const data=new Uint8Array(analyser.frequencyBinCount);analyser.getByteFrequencyData(data);const bw=(w/data.length)*2;let x=0;
+    for(let i=0;i<data.length;i++){const bh=data[i]/255*h,g=c.createLinearGradient(0,h,0,0);g.addColorStop(0,'#3b82f6');g.addColorStop(1,'#10b981');c.fillStyle=g;c.fillRect(x,h-bh,bw-1,bh);x+=bw}
+  };loop()
+}
 
-    // YouTube API Initialization callback
-    window.onYouTubeIframeAPIReady = function() {
-      ytPlayer = new YT.Player('ytPlayer', {
-        height: '100%',
-        width: '100%',
-        playerVars: {
-          'playsinline': 1,
-          'controls': 1,
-          'disablekb': 1,
-          'fs': 1,
-          'rel': 0,
-          'autoplay': 0
-        },
-        events: {
-          'onReady': () => { isYtReady = true; },
-          'onStateChange': (e) => {
-            // Optional: Handle manual user interactions if necessary
-          }
-        }
-      });
-    };
-
-    // Helper: Extract YouTube ID from link or input string
-    function extractYtId(url) {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = String(url).trim().match(regExp);
-      return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
-    }
-
-    // Update Status Badge UI
-    const setStatus = (text, isOnline = true) => {
-      $('#status').textContent = text;
-      const dot = $('#statusDot');
-      if (isOnline) {
-        dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-amber-400";
-      }
-    };
-
-    const nudge = () => +$('#nudge').value / 1000;
-    const lat = () => (ctx && ctx.outputLatency) || 0;
-    const expectedPos = () => state.anchorPos + Math.max(0, (hostNow() - state.anchorHost) / 1000);
-    const cur = () => state.queue[state.index];
-    const code6 = () => Math.random().toString(36).substring(2, 8).toLowerCase();
-
-    /* ================= AUDIO & MEDIA ENGINE ================= */
-    function ensureCtx() {
-      if (!ctx) {
-        ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-        master = ctx.createGain();
-        master.gain.value = $('#vol').value / 100;
-        
-        // Setup Analyser for visualizer
-        analyser = ctx.createAnalyser();
-        analyser.fftSize = 128;
-        
-        master.connect(analyser);
-        analyser.connect(ctx.destination);
-
-        drawVisualizer();
-      }
-      if (ctx.state !== 'running') {
-        ctx.resume();
-      }
-      if (navigator.wakeLock) {
-        navigator.wakeLock.request('screen').catch(() => {});
+/* YouTube */
+window.onYouTubeIframeAPIReady=()=>{
+  ytPlayer=new YT.Player('ytPlayer',{
+    height:'100%',width:'100%',playerVars:{playsinline:1,controls:1,disablekb:1,fs:1,rel:0,autoplay:0},
+    events:{
+      onReady:()=>{isYtReady=true},
+      onAutoplayBlocked:()=>{ytAutoplayBlocked=true;$('#ytEnable').classList.remove('hidden');setStatus('Tap Enable YouTube Playback',false)},
+      onStateChange:e=>{
+        if(e.data===YT.PlayerState.ENDED&&isHost)next(1.5);
+        /* YouTube does not expose a supported generic ad-state API.
+           This hook is intentionally conservative; no ad-skipping/network interception is used. */
       }
     }
+  })
+};
 
-    function decode(id) {
-      if (dec[id] || bad[id] || !raw[id]) return Promise.resolve();
-      return pend[id] ||= ctx.decodeAudioData(raw[id].slice(0))
-        .then(b => { dec[id] = b; })
-        .catch(() => { 
-          bad[id] = 1; 
-          setStatus('Failed to decode track', false); 
-        })
-        .finally(() => { delete pend[id]; });
+function applyYouTubeSync(tr){
+  if(!isYtReady||!ytPlayer)return;
+  $('#visualizer').classList.add('hidden');$('#ytContainer').classList.remove('hidden');
+  const vd=ytPlayer.getVideoData?.(),loaded=vd?.video_id||null;
+  if(loaded!==tr.ytId){ytPlayer.loadVideoById(tr.ytId,Math.max(0,expectedPos()));return}
+  const target=Math.max(0,expectedPos()+nudge());
+  const wait=(state.anchorHost-hostNow())/1000;
+  if(wait>0){countdown(wait*1000);try{ytPlayer.pauseVideo();ytPlayer.seekTo(state.anchorPos,true)}catch{};return}
+  if(ytAutoplayBlocked)return;
+  const ps=ytPlayer.getPlayerState();
+  if(ps!==YT.PlayerState.PLAYING&&ps!==YT.PlayerState.BUFFERING)try{ytPlayer.playVideo()}catch{}
+  const t=ytPlayer.getCurrentTime?.()||0;
+  if(Math.abs(t-target)>.3)try{ytPlayer.seekTo(target,true)}catch{}
+  if(!ytAdMuted)try{ytPlayer.setVolume(+$('input#vol').value)}catch{}
+}
+$('#ytEnable').onclick=()=>{ensureCtx();ytAutoplayBlocked=false;$('#ytEnable').classList.add('hidden');try{ytPlayer.unMute();ytPlayer.playVideo()}catch{}};
+
+/* Room / network */
+function hostRoom(id){
+  isHost=true;roomId=id;offset=0;
+  const clean=id.replace('insync-',''),url=location.origin+location.pathname+'#join='+clean;
+  $('#link').value=url;$('#qr').innerHTML='';
+  new QRCode($('#qr'),{text:url,width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  setStatus('Host Room: '+clean);
+  setupLocalBroadcast(id);
+  peer.on('connection',attachHostConnection);
+  devCount();
+}
+
+function attachHostConnection(c){
+  c.on('open',()=>{
+    if(!conns.includes(c))conns.push(c);
+    c.send({t:'state',s:state});
+    devCount();
+    state.queue.forEach(s=>{if(s.type!=='youtube'&&raw[s.id])sendLater(c,s.id)})
+  });
+  c.on('data',d=>handleHostData(c,d));
+  c.on('close',()=>{conns=conns.filter(x=>x!==c);devCount()});
+  c.on('error',e=>console.warn('Peer connection error',e));
+}
+
+function handleHostData(c,d){
+  if(!d)return;
+  if(d.t==='ping'){c.send({t:'pong',c0:d.c0,h:wall()});return}
+  if(d.t==='request_state'){c.send({t:'state',s:state});return}
+  if(d.t==='add_youtube'&&d.ytId){addYoutubeTrack(d.ytId);return}
+  if(d.t==='add_file_meta'&&d.meta){
+    const id=d.meta.id;inc[id]={parts:[],n:d.meta.n,from:c,meta:d.meta.track};
+    return
+  }
+  if(d.t==='chunk'&&inc[d.id]){
+    const x=inc[d.id];x.parts[d.i]=d.d;
+    if(x.parts.filter(Boolean).length===x.n){
+      new Blob(x.parts).arrayBuffer().then(ab=>{
+        raw[d.id]=ab;state.queue.push(x.meta);delete inc[d.id];push();
+        conns.forEach(g=>{if(g!==x.from)sendLater(g,d.id)})
+      })
     }
+  }
+}
 
-    function trim() {
-      const keep = [cur(), state.queue[state.index + 1]].filter(Boolean).filter(s => s.type !== 'youtube').map(s => s.id);
-      Object.keys(dec).forEach(id => keep.includes(id) || delete dec[id]);
+function setupLocalBroadcast(id){
+  try{
+    localBC=new BroadcastChannel('insync_room_'+id);
+    localBC.onmessage=e=>{
+      const d=e.data;if(!d)return;
+      if(isHost){
+        if(d.t==='ping')localBC.postMessage({t:'pong',c0:d.c0,h:wall(),target:d.sender});
+        else if(d.t==='request_state')localBC.postMessage({t:'state',s:state});
+      }else handleGuestData(d);
     }
-
-    function apply() {
-      render();
-      if (!ctx) return;
-      const tr = cur();
-      if (!tr || state.status !== 'playing') { 
-        stop(); 
-        return; 
-      }
-      
-      // Handle YouTube Track Sync
-      if (tr.type === 'youtube') {
-        stopAudio();
-        applyYouTubeSync(tr);
-        return;
-      } else {
-        stopYouTube();
-      }
-
-      trim();
-      
-      if (!dec[tr.id]) {
-        if (raw[tr.id] && !bad[tr.id]) decode(tr.id).then(apply);
-        else if (!raw[tr.id]) setStatus('Receiving song buffer…', false);
-        return;
-      }
-
-      // Pre-decode next audio track for zero-gap switching
-      const nx = state.queue[state.index + 1]; 
-      if (nx && nx.type !== 'youtube') decode(nx.id);
-
-      const key = tr.id + '|' + state.anchorHost + '|' + $('#chan').value;
-      if (!play || play.key !== key) begin(tr, key); 
-      else correct();
-    }
-
-    // Dynamic state evaluation loop
-    setInterval(apply, 1500);
-
-    /* ================= YOUTUBE SYNC LOGIC ================= */
-    function applyYouTubeSync(tr) {
-      if (!isYtReady || !ytPlayer || !ytPlayer.loadVideoById) return;
-
-      const visualizer = $('#visualizer');
-      const ytContainer = $('#ytContainer');
-      
-      visualizer.classList.add('hidden');
-      ytContainer.classList.remove('hidden');
-
-      const key = tr.ytId + '|' + state.anchorHost;
-      const currentVideoData = ytPlayer.getVideoData ? ytPlayer.getVideoData() : null;
-      const loadedId = currentVideoData ? currentVideoData.video_id : null;
-
-      // Load new video if changed
-      if (loadedId !== tr.ytId) {
-        ytPlayer.loadVideoById(tr.ytId, expectedPos());
-      }
-
-      // Sync playback state
-      const targetPos = Math.max(0, expectedPos() + nudge());
-      const w = (state.anchorHost - hostNow()) / 1000;
-
-      if (w > 0) {
-        countdown(w * 1000);
-        ytPlayer.pauseVideo();
-        ytPlayer.seekTo(state.anchorPos, true);
-      } else {
-        const playerState = ytPlayer.getPlayerState();
-        if (playerState !== YT.PlayerState.PLAYING && playerState !== YT.PlayerState.BUFFERING) {
-          ytPlayer.playVideo();
-        }
-
-        // Correct YouTube Time Drift
-        const ytTime = ytPlayer.getCurrentTime();
-        const drift = Math.abs(ytTime - targetPos);
-        if (drift > 0.3) {
-          ytPlayer.seekTo(targetPos, true);
-        }
-      }
-
-      // Apply volume
-      ytPlayer.setVolume($('#vol').value);
-    }
-
-    function stopYouTube() {
-      if (ytPlayer && ytPlayer.stopVideo && isYtReady) {
-        try { ytPlayer.stopVideo(); } catch {}
-      }
-      $('#ytContainer').classList.add('hidden');
-      $('#visualizer').classList.remove('hidden');
-    }
-
-    /* ================= AUDIO SYNC LOGIC ================= */
-    function begin(tr, key) {
-      stopAudio();
-      const buf = dec[tr.id];
-      const mode = $('#chan').value;
-      const src = ctx.createBufferSource(); 
-      src.buffer = buf;
-
-      // Stereo Channel Splitter Logic
-      if (buf.numberOfChannels > 1 && mode !== 'both') {
-        const splitter = ctx.createChannelSplitter(2);
-        const merger = ctx.createChannelMerger(2);
-        
-        src.connect(splitter);
-        const channelIndex = mode === 'left' ? 0 : 1;
-        // Route single channel to both ears for balanced mono-isolated sound
-        splitter.connect(merger, channelIndex, 0);
-        splitter.connect(merger, channelIndex, 1);
-        merger.connect(master);
-      } else {
-        src.connect(master);
-      }
-
-      const w = (state.anchorHost - hostNow()) / 1000; // Seconds to start time
-      let when, pos;
-
-      if (w > 0) { 
-        when = ctx.currentTime + w + nudge() - lat(); 
-        pos = state.anchorPos; 
-        countdown(w * 1000); 
-      } else { 
-        when = ctx.currentTime; 
-        pos = expectedPos() - nudge() + lat(); 
-      }
-
-      const d = when - ctx.currentTime;
-      if (d < 0) { 
-        pos -= d; 
-        when = ctx.currentTime; 
-      }
-
-      if (pos >= buf.duration) { 
-        if (isHost) next(1.5); 
-        return; 
-      }
-
-      src.start(when, pos);
-      play = { key, src, baseCtx: when, basePos: pos, rate: 1, duration: buf.duration };
-      
-      src.onended = () => { 
-        if (play && play.src === src) { 
-          play = null; 
-          if (isHost) next(1.5); 
-        } 
-      };
-    }
-
-    // High-resolution clock drift auto-correction
-    function correct() {
-      if (!play || ctx.currentTime < play.baseCtx + 0.5) return;
-      const pos = play.basePos + (ctx.currentTime - play.baseCtx) * play.rate;
-      const drift = pos - (expectedPos() - nudge() + lat());
-
-      // If drift exceeds 250ms, hard re-sync audio
-      if (Math.abs(drift) > 0.25) { 
-        play.key = ''; 
-        apply(); 
-        return; 
-      }
-
-      // Smooth pitch/rate adjustments for minor sub-100ms drift
-      const r = Math.abs(drift) > 0.004 ? 1 - Math.max(-0.005, Math.min(0.005, drift * 0.25)) : 1;
-      if (r !== play.rate) {
-        play.basePos = pos; 
-        play.baseCtx = ctx.currentTime; 
-        play.rate = r;
-        play.src.playbackRate.value = r;
-      }
-    }
-
-    function stopAudio() {
-      if (play) { 
-        play.src.onended = null; 
-        try { play.src.stop(); } catch {} 
-        play = null; 
-      }
-    }
-
-    function stop() {
-      stopAudio();
-      stopYouTube();
-      clearInterval(cdTimer); 
-      $('#countContainer').classList.add('hidden');
-    }
-
-    function countdown(ms) {
-      clearInterval(cdTimer);
-      const container = $('#countContainer');
-      const el = $('#count');
-      container.classList.remove('hidden');
-      
-      const end = performance.now() + ms;
-      const tick = () => {
-        const r = end - performance.now();
-        if (r <= 0) { 
-          container.classList.add('hidden'); 
-          clearInterval(cdTimer); 
-          return; 
-        }
-        el.textContent = (r / 1000).toFixed(1) + 's';
-      };
-      tick(); 
-      cdTimer = setInterval(tick, 50);
-    }
-
-    // Calibration Sound Pulse
-    function beep(at) {
-      ensureCtx();
-      for (let i = 0; i < 4; i++) {
-        const when = ctx.currentTime + (at - hostNow()) / 1000 + i * 0.5 + nudge() - lat();
-        if (when <= ctx.currentTime) continue;
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'sine';
-        o.frequency.value = i === 3 ? 1200 : 800;
-        g.gain.setValueAtTime(0.5, when);
-        g.gain.exponentialRampToValueAtTime(0.001, when + 0.08);
-        o.connect(g); 
-        g.connect(master); 
-        o.start(when); 
-        o.stop(when + 0.1);
-      }
-    }
-
-    /* ================= VISUALIZER ================= */
-    function drawVisualizer() {
-      const canvas = $('#visualizer');
-      const ctx2d = canvas.getContext('2d');
-
-      const renderLoop = () => {
-        animFrame = requestAnimationFrame(renderLoop);
-        
-        // Match resolution
-        if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
-          canvas.width = canvas.clientWidth;
-          canvas.height = canvas.clientHeight;
-        }
-
-        const width = canvas.width;
-        const height = canvas.height;
-
-        ctx2d.clearRect(0, 0, width, height);
-
-        if (!analyser || state.status !== 'playing' || (cur() && cur().type === 'youtube')) {
-          // Idle state line
-          ctx2d.beginPath();
-          ctx2d.strokeStyle = '#334155';
-          ctx2d.lineWidth = 2;
-          ctx2d.moveTo(0, height / 2);
-          ctx2d.lineTo(width, height / 2);
-          ctx2d.stroke();
-          return;
-        }
-
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        analyser.getByteFrequencyData(dataArray);
-
-        const barWidth = (width / bufferLength) * 2;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-          const barHeight = (dataArray[i] / 255) * height;
-
-          const gradient = ctx2d.createLinearGradient(0, height, 0, 0);
-          gradient.addColorStop(0, '#3b82f6');
-          gradient.addColorStop(1, '#10b981');
-
-          ctx2d.fillStyle = gradient;
-          ctx2d.fillRect(x, height - barHeight, barWidth - 1, barHeight);
-
-          x += barWidth;
-        }
-      };
-
-      renderLoop();
-    }
-
-    /* ================= HOST LOGIC ================= */
-    function hostRoom(id) {
-      isHost = true; 
-      offset = 0;
-      const cleanCode = id.replace('insync-', '');
-      const url = location.origin + location.pathname + '#join=' + cleanCode;
-      
-      $('#link').value = url;
-      $('#qr').innerHTML = '';
-      
-      // Generate scannable QR code with explicit padding & high error correction
-      new QRCode($('#qr'), { 
-        text: url, 
-        width: 160, 
-        height: 160,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      setStatus('Host Room: ' + cleanCode.toUpperCase());
-
-      // Configure local cross-tab fallback channel
-      setupLocalBroadcast(id);
-
-      if (peer) {
-        peer.on('connection', c => {
-          c.on('open', () => {
-            conns.push(c); 
-            c.send({ t: 'state', s: state }); 
-            devCount();
-            state.queue.forEach(s => {
-              if (s.type !== 'youtube') sendLater(c, s.id);
-            });
-          });
-
-          c.on('data', d => { 
-            if (d.t === 'ping') c.send({ t: 'pong', c0: d.c0, h: wall() }); 
-          });
-
-          c.on('close', () => { 
-            conns = conns.filter(x => x !== c); 
-            devCount(); 
-          });
-        });
-      }
-
-      setInterval(() => broadcastState(), 3000);
-      devCount();
-    }
-
-    function setupLocalBroadcast(roomId) {
-      try {
-        localBC = new BroadcastChannel('insync_room_' + roomId);
-        localBC.onmessage = (evt) => {
-          const d = evt.data;
-          if (!d) return;
-          if (isHost) {
-            if (d.t === 'ping') {
-              localBC.postMessage({ t: 'pong', c0: d.c0, h: wall(), targetGuest: d.sender });
-            } else if (d.t === 'request_state') {
-              localBC.postMessage({ t: 'state', s: state });
-            }
-          } else {
-            handleGuestData(d);
-          }
-        };
-      } catch (e) {
-        console.warn('BroadcastChannel not supported in this environment.', e);
-      }
-    }
-
-    function broadcastState() {
-      if (isHost) {
-        conns.forEach(c => c.open && c.send({ t: 'state', s: state }));
-        if (localBC) localBC.postMessage({ t: 'state', s: state });
-      }
-    }
-
-    const devCount = () => $('#devs').textContent = (conns.length + (isLocalBCMode ? 1 : 0) + 1) + ' Device(s) Active';
-    function push() { 
-      broadcastState(); 
-      apply(); 
-    }
-
-    function sendLater(c, id) { 
-      c._q = (c._q || Promise.resolve()).then(() => sendTrack(c, id)); 
-    }
-
-    async function sendTrack(c, id) {
-      const b = raw[id]; 
-      if (!b) return;
-      const N = 16384; 
-      const n = Math.ceil(b.byteLength / N);
-      c.send({ t: 'meta', id, n });
-      for (let i = 0; i < n; i++) {
-        while (c.open && c.dataChannel.bufferedAmount > 65536) {
-          await new Promise(r => setTimeout(r, 10));
-        }
-        if (!c.open) return;
-        c.send({ t: 'chunk', id, d: b.slice(i * N, (i + 1) * N) });
-      }
-    }
-
-    const delay = () => +$('#delay').value;
-
-    function playIndex(i, d = delay()) {
-      state.index = i; 
-      state.status = 'playing'; 
-      state.anchorPos = 0; 
-      state.anchorHost = hostNow() + d * 1000; 
-      push();
-    }
-
-    function togglePlay() {
-      ensureCtx();
-      if (state.status === 'playing') {
-        state.anchorPos = expectedPos(); 
-        state.anchorHost = hostNow(); 
-        state.status = 'paused';
-      } else if (state.queue.length) {
-        if (state.index < 0) { state.index = 0; state.anchorPos = 0; }
-        state.status = 'playing'; 
-        state.anchorHost = hostNow() + delay() * 1000;
-      }
-      push();
-    }
-
-    function next(d = delay()) {
-      if (state.index + 1 < state.queue.length) {
-        playIndex(state.index + 1, d);
-      } else { 
-        state.status = 'idle'; 
-        state.index = -1; 
-        state.anchorPos = 0; 
-        push(); 
-      }
-    }
-
-    function removeAt(i) {
-      const target = state.queue[i];
-      if (target && target.id) delete raw[target.id];
-      state.queue.splice(i, 1);
-      if (i < state.index) state.index--;
-      else if (i === state.index) {
-        if (state.queue.length) return playIndex(Math.min(i, state.queue.length - 1));
-        state.index = -1; 
-        state.status = 'idle';
-      }
-      push();
-    }
-
-    // Add YouTube Video to Queue
-    async function addYoutubeTrack(ytId) {
-      ensureCtx();
-      const id = code6();
-      let title = 'YouTube Video (' + ytId + ')';
-
-      // Attempt to fetch title via oEmbed
-      try {
-        const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.title) title = data.title;
-        }
-      } catch (err) {}
-
-      state.queue.push({ id, type: 'youtube', ytId, name: title });
-      push();
-    }
-
-    $('#addYtBtn').onclick = () => {
-      const input = $('#ytUrl');
-      const ytId = extractYtId(input.value);
-      if (ytId) {
-        addYoutubeTrack(ytId);
-        input.value = '';
-      } else {
-        alert('Please enter a valid YouTube Video Link or ID');
-      }
-    };
-
-    $('#files').onchange = async e => {
-      ensureCtx();
-      for (const f of e.target.files) {
-        const id = code6();
-        raw[id] = await f.arrayBuffer();
-        state.queue.push({ id, type: 'file', name: f.name.replace(/\.[^.]+$/, '') });
-        push();
-        conns.forEach(c => sendLater(c, id));
-      }
-      e.target.value = '';
-    };
-
-    /* ================= GUEST LOGIC ================= */
-    function joinRoom(id) {
-      setupLocalBroadcast(id);
-      
-      if (peer) {
-        try {
-          hostConn = peer.connect(id, { reliable: true });
-          hostConn.on('open', () => { 
-            setStatus('Connected · Syncing Clock…'); 
-            syncClock(20); 
-          });
-
-          hostConn.on('close', () => setStatus('Host Disconnected', false));
-          hostConn.on('data', d => handleGuestData(d));
-        } catch(e) {
-          console.warn('WebRTC peer connection restricted. Falling back to local broadcast mode.');
-          useLocalFallback(id);
-        }
-      } else {
-        useLocalFallback(id);
-      }
-
-      setInterval(() => {
-        if (hostConn && hostConn.open) {
-          syncClock(6);
-        } else if (isLocalBCMode) {
-          syncClockLocal(6);
-        }
-      }, 25000);
-    }
-
-    function useLocalFallback(id) {
-      isLocalBCMode = true;
-      setStatus('Local Tab Sync Mode · Connecting…');
-      if (localBC) {
-        localBC.postMessage({ t: 'request_state' });
-        syncClockLocal(10);
-      }
-    }
-
-    function handleGuestData(d) {
-      if (d.t === 'pong') {
-        const c1 = wall();
-        const rtt = c1 - d.c0;
-        if (rtt <= bestRtt * 1.3 + 5) {
-          offset = d.h - (d.c0 + c1) / 2; 
-          bestRtt = Math.min(bestRtt, rtt);
-          if (!Object.keys(inc).length) setStatus('Synced (RTT ' + rtt.toFixed(0) + 'ms)');
-        }
-      } else if (d.t === 'state') {
-        state = d.s;
-        Object.keys(raw).forEach(id => state.queue.some(s => s.id === id) || delete raw[id]);
-        apply();
-      } else if (d.t === 'meta') {
-        inc[d.id] = { parts: [], n: d.n };
-      } else if (d.t === 'chunk') {
-        const x = inc[d.id]; 
-        if (!x) return;
-        x.parts.push(d.d);
-        setStatus('Downloading track ' + Math.round((x.parts.length / x.n) * 100) + '%', false);
-        if (x.parts.length === x.n) {
-          new Blob(x.parts).arrayBuffer().then(ab => {
-            raw[d.id] = ab; 
-            delete inc[d.id]; 
-            setStatus('Track Ready · Synced'); 
-            apply();
-          });
-        }
-      } else if (d.t === 'beep') {
-        beep(d.at);
-      }
-    }
-
-    function syncClock(n) {
-      let i = 0;
-      const go = () => { 
-        if (hostConn && hostConn.open) {
-          hostConn.send({ t: 'ping', c0: wall() }); 
-          if (++i < n) setTimeout(go, 80); 
-        }
-      };
-      go();
-    }
-
-    function syncClockLocal(n) {
-      let i = 0;
-      const guestId = Math.random();
-      const go = () => {
-        if (localBC) {
-          localBC.postMessage({ t: 'ping', c0: wall(), sender: guestId });
-          if (++i < n) setTimeout(go, 80);
-        }
-      };
-      go();
-    }
-
-    /* ================= UI RENDERER ================= */
-    function render() {
-      // Queue rendering
-      const q = $('#queue');
-      $('#queueCount').textContent = state.queue.length + ' tracks';
-
-      if (state.queue.length === 0) {
-        q.innerHTML = '<li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Add audio files or YouTube links.</li>';
-      } else {
-        q.innerHTML = '';
-        state.queue.forEach((s, i) => {
-          const li = document.createElement('li');
-          const isCurrent = i === state.index;
-          const isYt = s.type === 'youtube';
-          
-          li.className = `flex items-center justify-between p-3 rounded-2xl transition border ${
-            isCurrent 
-              ? 'bg-blue-500/10 border-blue-500/40 text-blue-300 font-bold' 
-              : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-900'
-          }`;
-
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'text-xs truncate flex-1 flex items-center gap-2';
-          
-          let icon = '<i class="fa-solid fa-music text-slate-600"></i>';
-          if (isYt) icon = '<i class="fa-brands fa-youtube text-red-500"></i>';
-          if (isCurrent) icon = '<i class="fa-solid fa-compact-disc animate-spin text-emerald-400"></i>';
-
-          const readyStatus = isYt || raw[s.id] ? '' : ' <span class="text-amber-400 text-[10px]">(Loading...)</span>';
-
-          nameSpan.innerHTML = `${icon} <span>${s.name}${readyStatus}</span>`;
-
-          li.appendChild(nameSpan);
-
-          if (isHost) {
-            nameSpan.style.cursor = 'pointer';
-            nameSpan.onclick = () => playIndex(i);
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'text-slate-500 hover:text-rose-400 p-1 text-xs transition ml-2';
-            removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-            removeBtn.onclick = (e) => { e.stopPropagation(); removeAt(i); };
-            li.appendChild(removeBtn);
-          }
-
-          q.appendChild(li);
-        });
-      }
-
-      // Play Button updates
-      const isPlaying = state.status === 'playing';
-      $('#playIcon').className = isPlaying ? 'fa-solid fa-pause text-lg' : 'fa-solid fa-play text-lg';
-      $('#playText').textContent = isPlaying ? 'Pause' : 'Play Session';
-
-      // Title & Progress Updates
-      const currentTrack = cur();
-      if (currentTrack) {
-        $('#nowPlayingTitle').textContent = currentTrack.name;
-        if (currentTrack.type === 'youtube') {
-          if (ytPlayer && ytPlayer.getDuration) {
-            const dur = ytPlayer.getDuration() || 0;
-            const currentPos = Math.min(dur, Math.max(0, expectedPos()));
-            $('#timeDisplay').textContent = formatTime(currentPos) + ' / ' + formatTime(dur);
-          }
-        } else if (play && play.duration) {
-          const currentPos = Math.min(play.duration, Math.max(0, expectedPos()));
-          $('#timeDisplay').textContent = formatTime(currentPos) + ' / ' + formatTime(play.duration);
-        }
-      } else {
-        $('#nowPlayingTitle').textContent = 'No Track Playing';
-        $('#timeDisplay').textContent = '0:00 / 0:00';
-      }
-
-      $('#nv').textContent = $('#nudge').value;
-      $('#volVal').textContent = $('#vol').value + '%';
-    }
-
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return m + ':' + (s < 10 ? '0' : '') + s;
-    }
-
-    // Controls Event Listeners
-    $('#play').onclick = togglePlay;
-    $('#next').onclick = () => { ensureCtx(); next(); };
-    $('#vol').oninput = e => {
-      $('#volVal').textContent = e.target.value + '%';
-      if (master) master.gain.value = e.target.value / 100;
-      if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(e.target.value);
-    };
-    $('#nudge').oninput = render;
-    $('#nudge').onchange = $('#chan').onchange = () => { 
-      if (play) play.key = ''; 
-      apply(); 
-    };
-
-    $('#copy').onclick = () => {
-      const linkInput = $('#link');
-      linkInput.select();
-      document.execCommand('copy');
-      $('#copy').textContent = 'Copied!';
-      setTimeout(() => $('#copy').textContent = 'Copy', 2000);
-    };
-
-    $('#test').onclick = () => {
-      ensureCtx();
-      const at = hostNow() + 2000;
-      conns.forEach(c => c.open && c.send({ t: 'beep', at }));
-      if (localBC) localBC.postMessage({ t: 'beep', at });
-      beep(at);
-    };
-
-    /* ================= INITIALIZATION ================= */
-    const toRoom = s => {
-      const m = String(s).toLowerCase().match(/insync-[a-z0-9]{6}|^[a-z0-9]{6}$/);
-      return m && (m[0].startsWith('insync-') ? m[0] : 'insync-' + m[0]);
-    };
-
-    function start(joinId) {
-      if (joinId) {
-        document.querySelectorAll('.hostonly').forEach(el => el.classList.add('hidden'));
-      }
-
-      const roomCode = joinId || 'insync-' + code6();
-
-      // Explicit configuration for PeerJS to handle restricted socket environments
-      const peerOptions = {
-        debug: 1,
-        secure: true,
-        port: 443,
-        pingInterval: 5000,
-        config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:global.stun.twilio.com:3478' }
-          ]
-        }
-      };
-
-      try {
-        peer = joinId ? new Peer(peerOptions) : new Peer(roomCode, peerOptions);
-
-        peer.on('open', id => joinId ? joinRoom(joinId) : hostRoom(id));
-        
-        peer.on('error', e => {
-          console.warn('PeerJS connection error:', e.type, e);
-          if (e.type === 'unavailable-id') { 
-            peer.destroy(); 
-            return start(); 
-          }
-          
-          // Handle security/WebSocket error gracefully
-          if (e.type === 'socket-error' || e.type === 'peer-unavailable' || e.type === 'disconnected') {
-            setStatus('Sandbox Mode (Local Tabs Only)', false);
-            if (joinId) {
-              joinRoom(joinId);
-            } else {
-              hostRoom(roomCode);
-            }
-          } else {
-            setStatus('Error: ' + e.type, false);
-          }
-        });
-      } catch (err) {
-        console.warn('PeerJS failed to initialize in sandbox context:', err);
-        setStatus('Sandbox Mode (Local Tabs Only)', false);
-        if (joinId) {
-          joinRoom(joinId);
-        } else {
-          hostRoom(roomCode);
-        }
-      }
-    }
-
-    function enter(joinId) {
-      ensureCtx();
-      $('#landing').classList.add('hidden');
-      $('#app').classList.remove('hidden');
-      start(joinId);
-    }
-
-    // QR Camera Scanner
-    async function scan() {
-      if (!('BarcodeDetector' in window)) {
-        alert('Camera QR detection is not supported in this browser. Please type the room code manually.');
-        return;
-      }
-      const v = $('#cam');
-      const camContainer = $('#camContainer');
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        camContainer.classList.remove('hidden');
-        v.srcObject = stream;
-        await v.play();
-
-        const detector = new BarcodeDetector({ formats: ['qr_code'] });
-        const detectLoop = async () => {
-          const results = await detector.detect(v).catch(() => []);
-          const id = results[0] && toRoom(results[0].rawValue);
-          if (id) {
-            stream.getTracks().forEach(t => t.stop());
-            camContainer.classList.add('hidden');
-            enter(id);
-          } else if (!camContainer.classList.contains('hidden')) {
-            requestAnimationFrame(detectLoop);
-          }
-        };
-        detectLoop();
-      } catch (e) {
-        alert('Could not access camera for QR scanning. Enter room code manually.');
-      }
-    }
-
-    $('#closeCamBtn').onclick = () => {
-      const v = $('#cam');
-      if (v.srcObject) {
-        v.srcObject.getTracks().forEach(t => t.stop());
-      }
-      $('#camContainer').classList.add('hidden');
-    };
-
-    $('#hostBtn').onclick = () => enter();
-    $('#scanBtn').onclick = scan;
-    $('#codeBtn').onclick = () => {
-      const id = toRoom($('#code').value);
-      if (id) enter(id);
-    };
-
-    // Auto-join from URL hash link
-    if (location.hash.startsWith('#join=')) {
-      const roomCode = location.hash.slice(6);
-      if (roomCode) {
-        $('#code').value = roomCode;
-      }
-    }
-  </script>
+  }catch(e){console.warn('BroadcastChannel unavailable',e)}
+}
+
+function broadcastState(){
+  if(!isHost)return;
+  conns.forEach(c=>{if(c.open)try{c.send({t:'state',s:state})}catch{}});
+  localBC?.postMessage({t:'state',s:state})
+}
+function devCount(){$('#devs').textContent=(conns.length+1)+' Device'+(conns.length===0?'':'s')+' Active'}
+function push(){broadcastState();apply()}
+
+function sendLater(c,id){c._q=(c._q||Promise.resolve()).then(()=>sendTrack(c,id)).catch(e=>console.warn(e))}
+async function sendTrack(c,id){
+  const b=raw[id];if(!b||!c.open)return;
+  const N=16384,n=Math.ceil(b.byteLength/N);
+  const track=state.queue.find(x=>x.id===id);
+  c.send({t:'meta',id,n,track});
+  for(let i=0;i<n;i++){
+    while(c.open&&c.dataChannel?.bufferedAmount>65536)await new Promise(r=>setTimeout(r,10));
+    if(!c.open)return;
+    c.send({t:'chunk',id,i,d:b.slice(i*N,(i+1)*N)})
+  }
+}
+
+function playIndex(i,d=delay()){
+  state.index=i;state.status='playing';state.anchorPos=0;state.anchorHost=hostNow()+d*1000;push()
+}
+function togglePlay(){
+  ensureCtx();
+  if(state.status==='playing'){state.anchorPos=expectedPos();state.anchorHost=hostNow();state.status='paused'}
+  else if(state.queue.length){if(state.index<0){state.index=0;state.anchorPos=0}state.status='playing';state.anchorHost=hostNow()+delay()*1000}
+  push()
+}
+function next(d=delay()){
+  if(state.index+1<state.queue.length)playIndex(state.index+1,d);
+  else{state.status='idle';state.index=-1;state.anchorPos=0;push()}
+}
+function removeAt(i){
+  if(!isHost)return;const target=state.queue[i];if(target)delete raw[target.id];
+  state.queue.splice(i,1);
+  if(i<state.index)state.index--;else if(i===state.index){if(state.queue.length)playIndex(Math.min(i,state.queue.length-1));else{state.index=-1;state.status='idle'}}
+  push()
+}
+
+function extractYtId(v){
+  v=String(v).trim();
+  if(/^[A-Za-z0-9_-]{11}$/.test(v))return v;
+  const m=v.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null
+}
+async function addYoutubeTrack(ytId){
+  const id='t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  let name='YouTube Video ('+ytId+')';
+  try{const r=await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v='+ytId+'&format=json');if(r.ok){const d=await r.json();if(d.title)name=d.title}}catch{}
+  state.queue.push({id,type:'youtube',ytId,name,addedBy:isHost?'Host':'Guest'});
+  push()
+}
+
+function requestYoutube(ytId){
+  if(isHost)addYoutubeTrack(ytId);
+  else if(hostConn?.open)hostConn.send({t:'add_youtube',ytId});
+  else if(localBC){localBC.postMessage({t:'add_youtube',ytId})}
+}
+
+async function sendFileToHost(file){
+  const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const ab=await file.arrayBuffer();raw[id]=ab;
+  const track={id,type:'file',name:file.name.replace(/\.[^.]+$/,''),addedBy:'Guest'};
+  const N=16384,n=Math.ceil(ab.byteLength/N);
+  if(hostConn?.open){
+    hostConn.send({t:'add_file_meta',meta:{id,n,track}});
+    for(let i=0;i<n;i++){while(hostConn.dataChannel?.bufferedAmount>65536)await new Promise(r=>setTimeout(r,10));hostConn.send({t:'chunk',id,i,d:ab.slice(i*N,(i+1)*N)})}
+  }else{setStatus('Not connected to host',false);delete raw[id]}
+}
+
+function handleGuestData(d){
+  if(d.t==='pong'){
+    const c1=wall(),rtt=c1-d.c0;
+    if(rtt<bestRtt){bestRtt=rtt;offset=d.h-(d.c0+c1)/2}
+    setStatus('Synced · RTT '+Math.round(bestRtt)+'ms')
+  }else if(d.t==='state'){
+    state=d.s;
+    Object.keys(raw).forEach(id=>{if(!state.queue.some(s=>s.id===id))delete raw[id]});
+    apply()
+  }else if(d.t==='meta'){
+    inc[d.id]={parts:[],n:d.n,meta:d.track}
+  }else if(d.t==='chunk'&&inc[d.id]){
+    const x=inc[d.id];x.parts[d.i]=d.d;
+    const got=x.parts.filter(Boolean).length;
+    setStatus('Downloading track '+Math.round(got/x.n*100)+'%',false);
+    if(got===x.n)new Blob(x.parts).arrayBuffer().then(ab=>{raw[d.id]=ab;delete inc[d.id];setStatus('Track Ready · Synced');apply()})
+  }else if(d.t==='beep')beep(d.at)
+}
+
+function syncClock(n=8){
+  let i=0;const go=()=>{if(hostConn?.open){hostConn.send({t:'ping',c0:wall()});if(++i<n)setTimeout(go,80)}};go()
+}
+function syncClockLocal(n=8){
+  let i=0,id=Math.random();const go=()=>{if(localBC){localBC.postMessage({t:'ping',c0:wall(),sender:id});if(++i<n)setTimeout(go,80)}};go()
+}
+
+function joinRoom(id){
+  roomId=id;setupLocalBroadcast(id);
+  hostConn=peer.connect(id,{reliable:true});
+  hostConn.on('open',()=>{setStatus('Connected · Syncing Clock…');syncClock(20);hostConn.send({t:'request_state'})});
+  hostConn.on('data',handleGuestData);
+  hostConn.on('close',()=>setStatus('Host Disconnected',false));
+  hostConn.on('error',e=>setStatus('Connection Error',false));
+  clockTimer=setInterval(()=>{if(hostConn?.open)syncClock(6);else if(localBC)syncClockLocal(6)},25000)
+}
+
+function render(){
+  const q=$('#queue');$('#queueCount').textContent=state.queue.length+' tracks';
+  if(!state.queue.length){q.innerHTML='<li class="text-center py-6 text-slate-500 text-sm">Queue is empty. Add audio files or YouTube links.</li>'}
+  else{
+    q.innerHTML='';
+    state.queue.forEach((s,i)=>{
+      const li=document.createElement('li'),current=i===state.index,yt=s.type==='youtube';
+      li.className='flex items-center justify-between p-3 rounded-2xl border '+(current?'bg-blue-500/10 border-blue-500/40 text-blue-300':'bg-slate-900/60 border-slate-800/80 text-slate-300');
+      const name=document.createElement('span');name.className='text-xs truncate flex-1 flex items-center gap-2';
+      const icon=current?'<i class="fa-solid fa-compact-disc animate-spin text-emerald-400"></i>':yt?'<i class="fa-brands fa-youtube text-red-500"></i>':'<i class="fa-solid fa-music text-slate-600"></i>';
+      name.innerHTML=icon+'<span>'+escapeHtml(s.name)+' <small class="text-slate-500">· '+escapeHtml(s.addedBy||'Host')+'</small></span>';
+      if(isHost){name.style.cursor='pointer';name.onclick=()=>playIndex(i)}
+      li.appendChild(name);
+      if(isHost){const b=document.createElement('button');b.className='text-slate-500 hover:text-rose-400 p-1 text-xs ml-2';b.innerHTML='<i class="fa-solid fa-xmark"></i>';b.onclick=e=>{e.stopPropagation();removeAt(i)};li.appendChild(b)}
+      q.appendChild(li)
+    })
+  }
+  const playing=state.status==='playing';$('#playIcon').className=playing?'fa-solid fa-pause text-lg':'fa-solid fa-play text-lg';$('#playText').textContent=playing?'Pause':'Play Session';
+  const t=cur();
+  if(t){$('#nowPlayingTitle').textContent=t.name;if(t.type==='youtube'&&ytPlayer?.getDuration){const d=ytPlayer.getDuration()||0;$('#timeDisplay').textContent=formatTime(Math.min(d,Math.max(0,expectedPos())))+' / '+formatTime(d)}else if(playNode){$('#timeDisplay').textContent=formatTime(Math.min(playNode.duration,Math.max(0,expectedPos())))+' / '+formatTime(playNode.duration)}}else{$('#nowPlayingTitle').textContent='No Track Playing';$('#timeDisplay').textContent='0:00 / 0:00'}
+  $('#nv').textContent=$('#nudge').value;$('#volVal').textContent=$('#vol').value+'%'
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formatTime(s){s=Math.max(0,s||0);const m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+(x<10?'0':'')+x}
+
+$('#addYtBtn').onclick=()=>{const id=extractYtId($('#ytUrl').value);if(id){requestYoutube(id);$('#ytUrl').value=''}else alert('Please enter a valid YouTube Video Link or ID')};
+$('#files').onchange=async e=>{
+  ensureCtx();
+  for(const f of e.target.files){
+    if(isHost){
+      const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+      raw[id]=await f.arrayBuffer();
+      state.queue.push({id,type:'file',name:f.name.replace(/\.[^.]+$/,''),addedBy:'Host'});
+      conns.forEach(c=>sendLater(c,id));push()
+    }else await sendFileToHost(f)
+  }
+  e.target.value=''
+};
+$('#play').onclick=()=>isHost&&togglePlay();
+$('#next').onclick=()=>isHost&&(ensureCtx(),next());
+$('#vol').oninput=e=>{if(master)master.gain.value=e.target.value/100;if(ytPlayer?.setVolume&&!ytAdMuted)ytPlayer.setVolume(+e.target.value);render()};
+$('#nudge').oninput=render;
+$('#nudge').onchange=$('#chan').onchange=()=>{if(playNode)playNode.key='';apply()};
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#link').value)}catch{const x=$('#link');x.select();document.execCommand('copy')}$('#copy').textContent='Copied!';setTimeout(()=>$('#copy').textContent='Copy',1500)};
+$('#test').onclick=()=>{ensureCtx();const at=hostNow()+2000;conns.forEach(c=>c.open&&c.send({t:'beep',at}));localBC?.postMessage({t:'beep',at});beep(at)};
+
+function start(joinId){
+  const room=joinId||'insync-'+code6();
+  peer=joinId?new Peer({debug:1,secure:true,port:443,config:{iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:global.stun.twilio.com:3478'}
+  ]}}):new Peer(room,{debug:1,secure:true,port:443,config:{iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:global.stun.twilio.com:3478'}
+  ]}});
+  peer.on('open',id=>joinId?joinRoom(joinId):hostRoom(id));
+  peer.on('error',e=>{
+    console.warn('PeerJS error',e);
+    if(e.type==='unavailable-id'&&!joinId){peer.destroy();start();return}
+    if(e.type==='peer-unavailable'){setStatus('Host unavailable',false)}
+    else if(e.type==='socket-error'||e.type==='disconnected'){setStatus('Network signaling error',false)}
+    else setStatus('Error: '+e.type,false)
+  });
+}
+
+function enter(joinId){
+  ensureCtx();$('#landing').classList.add('hidden');$('#app').classList.remove('hidden');
+  if(joinId)document.querySelectorAll('.hostonly').forEach(x=>x.classList.add('hidden'));
+  start(joinId)
+}
+
+async function scan(){
+  if(!('BarcodeDetector'in window)){alert('QR detection is not supported here. Enter the 6-digit code manually.');return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=$('#cam'),box=$('#camContainer');box.classList.remove('hidden');v.srcObject=stream;await v.play();
+    const detector=new BarcodeDetector({formats:['qr_code']});
+    const loop=async()=>{const r=await detector.detect(v).catch(()=>[]);if(r[0]){const id=toRoom(r[0].rawValue);if(id){stream.getTracks().forEach(t=>t.stop());box.classList.add('hidden');enter(id);return}}if(!box.classList.contains('hidden'))requestAnimationFrame(loop)};loop()
+  }catch{alert('Could not access camera. Enter the room code manually.')}
+}
+function toRoom(v){const x=String(v).trim().toLowerCase().match(/(?:insync-)?([0-9]{6})/);return x?'insync-'+x[1]:null}
+$('#closeCamBtn').onclick=()=>{$('#cam').srcObject?.getTracks().forEach(t=>t.stop());$('#camContainer').classList.add('hidden')};
+$('#hostBtn').onclick=()=>enter();
+$('#scanBtn').onclick=scan;
+$('#code').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);
+$('#codeBtn').onclick=()=>{const id=toRoom($('#code').value);if(id)enter(id);else alert('Enter a valid 6-digit room code')};
+
+if(location.hash.startsWith('#join=')){const id=toRoom(location.hash.slice(6));if(id)enter(id)}
+setInterval(apply,1500);
+render();
+</script>
 </body>
 </html>
