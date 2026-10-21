@@ -521,7 +521,7 @@ function requestYoutube(ytId){
   else if(hostConn?.open)hostConn.send({t:'add_youtube',ytId});
   else if(localBC){localBC.postMessage({t:'add_youtube',ytId})}
 }
-
+// Dont use youtube, recommended to upload audio.
 /* ---------- Guest side ---------- */
 async function sendFileToHost(file){
   if(!file.size)return;
